@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-@author: NewNLPer
+@author: some_model_test
 @time: 2023/2/8 19:23
 coding with comment！！！
 """
@@ -52,7 +52,7 @@ print('-------------------------原始数据填充中---------------------------
 result=pd.read_csv(r"C:/Users/NewNLPer/Desktop/za/城堡竞赛/submit_example.csv")
 for i in range(25000):
     result['Label'][i]='*'
-result[['ID','Label']].to_csv("C:/Users/NewNLPer/Desktop/za/城堡竞赛/submit_example.csv",index=False)
+result[['ID','Label']].to_csv("C:/Users/some_model_test/Desktop/za/城堡竞赛/submit_example.csv",index=False)
 print()
 print('-------------------------数据填充完毕-----------------------------')
 
@@ -165,7 +165,7 @@ for step, batch in enumerate(test_iter):
         result['Label'][(step*50)+i]=int(pre_lab[i])
         print('预测数据正在写入submit_example，已完成%d'%((step*50)+i))
 print()
-result[['ID','Label']].to_csv('C:/Users/NewNLPer/Desktop/za/城堡竞赛/submit_example.csv',index=False)
+result[['ID','Label']].to_csv('C:/Users/some_model_test/Desktop/za/城堡竞赛/submit_example.csv',index=False)
 print('----------预测数据已经全部写入，已保存，请查看！！！----------')
 
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-@author: NewNLPer
+@author: some_model_test
 @time: 2023/3/1 13:17
 coding with comment！！！
 """
@@ -19,7 +19,7 @@ train_df = pd.read_csv(r"C:\Users\NewNLPer\Desktop\za\城堡竞赛\NER数据\1_t
 
 
 
-# test_df = pd.read_csv(r"C:\Users\NewNLPer\Desktop\za\城堡竞赛\NER数据\1_test.txt",sep="\t",header=None,names = ["char","label"])#(41560, 2)测试集
+# test_df = pd.read_csv(r"C:\Users\some_model_test\Desktop\za\城堡竞赛\NER数据\1_test.txt",sep="\t",header=None,names = ["char","label"])#(41560, 2)测试集
 
 #语料按照给定过的句子长度进行划分整合
 

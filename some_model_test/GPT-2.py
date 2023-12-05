@@ -1,7 +1,7 @@
 
 # -*- coding: utf-8 -*-
 """
-@author: NewNLPer
+@author: some_model_test
 @time: 2023/4/1 15:10
 coding with comment！！！
 """

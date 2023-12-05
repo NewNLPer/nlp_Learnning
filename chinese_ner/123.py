@@ -1,5 +1,5 @@
 """
-@author: NewNLPer
+@author: some_model_test
 @time: 2023/3/10 13:57
 coding with comment！！！
 """
@@ -18,9 +18,9 @@ from transformers import BertTokenizer
 # print(model)
 # exit()
 # import pandas as pd
-# train_df = pd.read_csv(r"C:\Users\NewNLPer\Desktop\train.txt",sep="\t",header=None,names = ["char","label"])#(2169879, 2)训练集
+# train_df = pd.read_csv(r"C:\Users\some_model_test\Desktop\train.txt",sep="\t",header=None,names = ["char","label"])#(2169879, 2)训练集
 #
-# train_df[['char','label']].to_csv(r"C:\Users\NewNLPer\Desktop\train.txt",index=False,header=None,sep=' ')
+# train_df[['char','label']].to_csv(r"C:\Users\some_model_test\Desktop\train.txt",index=False,header=None,sep=' ')
 
 #
 # import argparse
@@ -58,7 +58,7 @@ dest - 解析后的参数名称，默认情况下，对于可选参数选取最�
 
 # import torch
 # from torchtext import vocab
-# word_vectors = vocab.Vectors(r"C:\Users\NewNLPer\Desktop\za\gihub\LatticeLSTM-master\data\ctb.50d.vec")###预训练词向量加载
+# word_vectors = vocab.Vectors(r"C:\Users\some_model_test\Desktop\za\gihub\LatticeLSTM-master\data\ctb.50d.vec")###预训练词向量加载
 # s='我喜欢吃苹果'
 # lanel=[]
 # for item in s:
@@ -84,14 +84,14 @@ dest - 解析后的参数名称，默认情况下，对于可选参数选取最�
 
 # import torch
 # from torchtext import vocab
-# word_vectors = vocab.Vectors(r"C:\Users\NewNLPer\Desktop\za\gihub\Flat-Lattice-Transformer-master\embedding\ctb.50d.vec")
+# word_vectors = vocab.Vectors(r"C:\Users\some_model_test\Desktop\za\gihub\Flat-Lattice-Transformer-master\embedding\ctb.50d.vec")
 # print(word_vectors.stoi)
 
 
 
 
 # res=[]
-# with open(r"C:\Users\NewNLPer\Desktop\Chinese-NLP-Corpus-master\NER\Weibo\weibo_test.txt",encoding='utf-8') as f:    #设置文件对象
+# with open(r"C:\Users\some_model_test\Desktop\Chinese-NLP-Corpus-master\NER\Weibo\weibo_test.txt",encoding='utf-8') as f:    #设置文件对象
 #     lines = f.readlines()
 #     for line in lines:
 #         line=line.split('\t')
@@ -100,7 +100,7 @@ dest - 解析后的参数名称，默认情况下，对于可选参数选取最�
 #             res.append(line[0][0]+'\t'+res1)
 #         else:
 #             res.append('\n')
-# f=open(r"C:\Users\NewNLPer\Desktop\Chinese-NLP-Corpus-master\NER\Weibo\test.txt",'w',encoding='utf-8')
+# f=open(r"C:\Users\some_model_test\Desktop\Chinese-NLP-Corpus-master\NER\Weibo\test.txt",'w',encoding='utf-8')
 # for line in res:
 #     f.write(line+'\n')
 # f.close()

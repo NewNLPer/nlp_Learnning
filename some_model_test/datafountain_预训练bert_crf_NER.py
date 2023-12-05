@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-@author: NewNLPer
+@author: some_model_test
 @time: 2023/4/10 9:51
 coding with comment！！！
 """
@@ -31,7 +31,7 @@ predict_data.columns=['id','txt']
 #         txt.append(str(predict_data['txt'][i]))
 #         label.append(str(predict_data['id'][i]))
 #
-# with open(r"C:\Users\NewNLPer\Desktop\2.txt",'w') as f:
+# with open(r"C:\Users\some_model_test\Desktop\2.txt",'w') as f:
 #     for i in range(len(txt)):
 #         if txt[i]==',' or not txt[i]:
 #             f.write('*'+','+label[i]+'\n')
@@ -251,8 +251,8 @@ def train(epoch_nums,train_loader,model,optimizer):
         #     result['tag'][i] = my_dic[ans[i]]
         #
         #     print('正在写入文件，%d/%d' % (i + 1, len(ans)))
-        # result[['id', 'tag']].to_csv(r"C:\Users\NewNLPer\Desktop\ner\123.csv", index=False)
-        # print('已写入，请查看%s' % (r"C:\Users\NewNLPer\Desktop\ner\123.csv"))
+        # result[['id', 'tag']].to_csv(r"C:\Users\some_model_test\Desktop\ner\123.csv", index=False)
+        # print('已写入，请查看%s' % (r"C:\Users\some_model_test\Desktop\ner\123.csv"))
 
 if __name__=='__main__':
     train(epoch_nums,train_loader,model,optimizer)

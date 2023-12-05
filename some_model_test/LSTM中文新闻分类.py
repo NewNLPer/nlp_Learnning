@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-@author: NewNLPer
+@author: some_model_test
 @time: 2022/12/8 10:29
 coding with comment！！！
 """

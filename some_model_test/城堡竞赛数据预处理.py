@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-@author: NewNLPer
+@author: some_model_test
 @time: 2023/2/8 17:34
 coding with comment！！！
 """
@@ -24,7 +24,7 @@ def train_pre(text):
     cleaned_text = [s.stem(ws) for ws in without_stopwords]
     return ' '.join(cleaned_text)
 
-# train_df1 = pd.read_csv(r"C:/Users/NewNLPer/Desktop/za/城堡竞赛/pre_traindata.csv")
+# train_df1 = pd.read_csv(r"C:/Users/some_model_test/Desktop/za/城堡竞赛/pre_traindata.csv")
 train_df2=pd.read_csv(r"C:/Users/NewNLPer/Desktop/za/城堡竞赛/test.csv")
 print(train_df2.columns)
 train_df2.columns = ['Label','txt']
@@ -34,8 +34,8 @@ for i in range(25000):
     # train_df1['txt'][i]=train_pre(train_df1['txt'][i])
     train_df2['txt'][i] = train_pre(train_df2['txt'][i])
     print(i)
-# train_df1[["txt",'Label']].to_csv('C:/Users/NewNLPer/Desktop/za/城堡竞赛/pre_traindata.csv',index=False)
-train_df2[['txt','Label']].to_csv('C:/Users/NewNLPer/Desktop/za/城堡竞赛/pre_testdata.csv',index=False)
+# train_df1[["txt",'Label']].to_csv('C:/Users/some_model_test/Desktop/za/城堡竞赛/pre_traindata.csv',index=False)
+train_df2[['txt','Label']].to_csv('C:/Users/some_model_test/Desktop/za/城堡竞赛/pre_testdata.csv',index=False)
 
 
 

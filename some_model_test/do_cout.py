@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-@author: NewNLPer
+@author: some_model_test
 @time: 2023/4/6 13:31
 coding with comment！！！
 """
@@ -187,7 +187,7 @@ def train(model,optimizer,epoch_time,train_loader):
             result['tag'][i]=my_dic[ans[i]]
             print('正在写入文件，%d/%d'%(i+1,len(ans)))
         result[['id', 'tag']].to_csv(r"C:\Users\NewNLPer\Desktop\123.csv",index=False)
-        print('已写入，请查看%s'%('C:/Users/NewNLPer/Desktop/submit_example - 副本.csv'))
+        print('已写入，请查看%s'%('C:/Users/some_model_test/Desktop/submit_example - 副本.csv'))
 
 if __name__ == '__main__':
     train(model,optimizer,epoch_time,train_loader)

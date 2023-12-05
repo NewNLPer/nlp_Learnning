@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-@author: NewNLPer
+@author: some_model_test
 @time: 2023/2/9 21:31
 coding with comment！！！
 """
@@ -312,5 +312,5 @@ with torch.no_grad():
             result['Label'][(step*50)+i]=int(pre_lab[i])
             print('预测数据正在写入submit_example，已完成%d'%((step*50)+i))
 print()
-result[['ID','Label']].to_csv('C:/Users/NewNLPer/Desktop/za/城堡竞赛/submit_example.csv',index=False)
+result[['ID','Label']].to_csv('C:/Users/some_model_test/Desktop/za/城堡竞赛/submit_example.csv',index=False)
 print('----------预测数据已经全部写入，已保存，请查看！！！----------')

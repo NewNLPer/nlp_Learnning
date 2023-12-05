@@ -1,13 +1,13 @@
 # # -*- coding: utf-8 -*-
 # """
-# @author: NewNLPer
+# @author: some_model_test
 # @time: 2023/5/5 9:30
 # coding with comment！！！
 # """
 # from peft import get_peft_config, get_peft_model, LoraConfig, TaskType
 # from transformers import BertTokenizer, BertModel,AutoTokenizer
-# model_name_or_path = r"C:\Users\NewNLPer\Desktop\model"
-# tokenizer_name_or_path = r"C:\Users\NewNLPer\Desktop\model"
+# model_name_or_path = r"C:\Users\some_model_test\Desktop\model"
+# tokenizer_name_or_path = r"C:\Users\some_model_test\Desktop\model"
 #
 # model=BertModel.from_pretrained(model_name_or_path)
 # tokenize=AutoTokenizer.from_pretrained(tokenizer_name_or_path)
