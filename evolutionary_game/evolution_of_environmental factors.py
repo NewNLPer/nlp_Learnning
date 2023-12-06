@@ -40,14 +40,12 @@ def get_plot(x,t):
 
 if __name__=="__main__":
 
-
     initial_x=[0.5, 0.5] ##系统初始条件
     t = np.linspace(0, 800, 800)  #时间戳
     punish = 0.5
-    b = 1.2
+    b = 1.5
     xi = 0.01
     result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(punish, b, xi))
-    # print(result)
     get_plot(result,t)
 
 
