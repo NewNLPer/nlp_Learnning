@@ -38,7 +38,6 @@ def get_plot(x,t,remark):
     plt.savefig(r'C:/Users/NewNLPer/Desktop/za/exp_figure/{}.png'.format(remark))
     plt.show()
 
-
 def get_remark(b,punish,xi):
     remark="b={}_punish={}_xi={}".format(b,punish,xi)
     return remark
@@ -46,8 +45,8 @@ def get_remark(b,punish,xi):
 
 if __name__=="__main__":
 
-    initial_x=[0.5, 0.5] ##系统初始条件
-    t = np.linspace(0, 800, 800)  #时间戳
+    initial_x=[0.5, 0.5]
+    t = np.linspace(0, 800, 800)
     punish = 0.5
     b = 2
     xi = 0.01
