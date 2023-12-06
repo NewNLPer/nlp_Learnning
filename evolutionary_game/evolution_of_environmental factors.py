@@ -9,8 +9,8 @@ import numpy as np
 from scipy.integrate import odeint
 
 def Cooperation_proportion_derivatives(x, t, punish, b, xi):
-    function_1 = x[0] * (1 - x[0]) * (x[0] - b + punish * (x[1] * x[0] - 2 * x[1] + 1))
-    function_2 = xi * x[1] * (1 - x[1]) * ((1 - x[0]) * b - x[0] * x[0] + punish * (x[0] - 1 + x[1] - x[1] * x[0] * x[0]))
+    function_1 = x[0] * (1 - x[0]) * (x[0]-b+punish+x[1]*punish*(x[0]-2))
+    function_2 = xi * x[1] * (1 - x[1]) * (b*(1-x[0])+punish*(x[1]+x[0]-1)-x[0]*x[0]*(1+x[1]*punish))
     return [function_1, function_2]
 
 def get_plot(x,t):
@@ -42,8 +42,8 @@ if __name__=="__main__":
 
     initial_x=[0.5, 0.5] ##系统初始条件
     t = np.linspace(0, 800, 800)  #时间戳
-    punish = 0.5
-    b = 1.5
+    punish = 0.1
+    b = 1
     xi = 0.01
     result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(punish, b, xi))
     get_plot(result,t)
