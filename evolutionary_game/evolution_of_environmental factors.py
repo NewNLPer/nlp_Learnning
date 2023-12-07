@@ -11,6 +11,7 @@ from scipy.integrate import odeint
 def Cooperation_proportion_derivatives(x, t, punish, b, xi):
     function_1 = x[0] * (1 - x[0]) * (x[0]-b+punish+x[1]*punish*(x[0]-2))
     function_2 = xi * x[1] * (1 - x[1]) * (b*(1-x[0])+punish*(x[1]+x[0]-1)-x[0]*x[0]*(1+x[1]*punish))
+
     return [function_1, function_2]
 
 def get_plot(x,t,remark):
