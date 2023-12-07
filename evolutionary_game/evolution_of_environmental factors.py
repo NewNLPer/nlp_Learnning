@@ -77,7 +77,7 @@ if __name__=="__main__":
 
     initial_x=[0.5, 0.5 , 0.5]
     t = np.linspace(0, 2000, 2000)
-    punish = 0.5
+    punish = 0.3
     b = 1.003
     xi = 0.01
     p=0.5
