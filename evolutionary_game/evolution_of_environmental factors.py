@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import odeint
 
-def Cooperation_proportion_derivatives(x, t, punish, b, xi, small):
+def Cooperation_proportion_derivatives(x, t, punish, b, xi,p):
     """
     :param x:  Initial variable[x,ac,ad]
     :param t: time
@@ -17,13 +17,18 @@ def Cooperation_proportion_derivatives(x, t, punish, b, xi, small):
     :param xi:Growth rate control
     :return:
     """
-    piC_piD=punish*x[0]*(x[2]-x[1])+x[0]+x[1]*punish-b*x[0]
+
+    piC_piD = punish * x[0] * (x[2] + x[1]) + x[0] - x[1] * punish - b * x[0]
+
+    piC_p_piD = punish * x[0] * (x[1] + x[2] * p) + x[0] - x[1] * punish - b * x[0] * p
+
+
 
     function_1 = x[0] * ( 1 - x[0] ) * piC_piD
 
-    function_2 = xi * x[1] * ( 1 - x[1] ) * -1 * piC_piD * small
+    function_2 = xi * x[1] * ( 1 - x[1] ) * -1 * piC_p_piD
 
-    function_3 = xi * x[2] * ( 1 - x[2] ) * piC_piD
+    function_3 = xi * x[2] * ( 1 - x[2] ) * piC_p_piD
 
     return [function_1, function_2, function_3]
 
@@ -70,14 +75,14 @@ def get_remark(b,punish,xi):
 
 if __name__=="__main__":
 
-    initial_x=[0.5, 0.1 , 0.1]
+    initial_x=[0.5, 0.5 , 0.5]
     t = np.linspace(0, 2000, 2000)
     punish = 0.5
-    b = 1.001
+    b = 1.003
     xi = 0.01
-    small=0.1
+    p=0.5
     remark=get_remark(b,punish,xi)
-    result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(punish, b, xi,small))
+    result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(punish, b, xi,p))
     get_plot(result,t,remark)
 
 
