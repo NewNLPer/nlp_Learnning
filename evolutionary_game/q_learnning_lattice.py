@@ -19,17 +19,25 @@ print("you are using {} ... ".format(device))
 class Lattice():
     def __init__(self,nums):
 
-
         self.L=nums
         self.lattice_0=np.random.randint(0,3,(self.L,self.L)).tolist()
         self.lattice_1 = np.random.randint(0, 3, (self.L, self.L)).tolist()
-        self.q_table_dic = {str(i) + str(j): np.random.randint(0, 1, (5, 6)) for i in range(self.L) for j in range(self.L)}
-        self.label_dic = {"up":0,"down":1,"left":2,"right":3,"copy":4,"stay":5}
+        self.q_table_dic_0 = {str(i) +"-"+ str(j): np.random.randint(0, 1, (5, 6)) for i in range(self.L) for j in range(self.L)}
+        self.q_table_dic_1 = {str(i) +"-"+ str(j): np.random.randint(0, 1, (5, 6)) for i in range(self.L) for j in range(self.L)}
+        self.label_dic = {0:[-1,0],1:[1,0],2:[0,-1],3:[0,1],4:[0,0],5:[0,0]}
         self.eplison = 0.02
+        self.R0 = 1
+        self.R1 = 1
+        self.P0 = 0.1
+        self.P1 = -0.4
+        self.S0 = 0
+        self.S1 = 0
+        self.T0 = 1.3
+        self.T1 = 1.3
+
         """
         [上，下，左，右，复制层，不动]
         """
-
 
     def get_someone(self):
         i=random.randint(0,self.L - 1)
@@ -108,9 +116,9 @@ class Lattice():
 
     def moving(self,position):
 
-        collaborator_nums = self.count_collaborator(position,)[0]
-        none_position = self.count_collaborator(position,)[1]
-        position_q_table=self.q_table_dic[str(position[0])+str(position[1])]
+        collaborator_nums = self.count_collaborator(position,self.lattice_0)[0]
+        none_position = self.count_collaborator(position,self.lattice_0)[1]
+        position_q_table=self.q_table_dic_0[str(position[0])+str(position[1])]
 
         action_set=position_q_table[collaborator_nums]
         candidate_set = ["*"] * len(action_set)
@@ -127,13 +135,72 @@ class Lattice():
         else:
             random_index = self.find_max_index(candidate_set)
 
-        print(random_index)
+        for i in range(len(position)):
+            position[i]+=self.label_dic[random_index][i]
+        move_postion = self.Boundary_treatment(position)
+
+        if random_index==4:# 复制层  (另一层网络)
+            self.q_table_dic_1["".join(move_postion)]=self.q_table_dic_0["".join(position)]
+            self.q_table_dic_0["".join(position)]=np.random.randint(0,1,(5,6)).tolist()
+            self.lattice_1[move_postion[0]][move_postion[1]]=self.lattice_0[position[0]][position[1]]
+            self.lattice_0[position[0]][position[1]]=0
+
+        elif random_index==5: # 不动  (同一层网络)
+            pass
+        else: # (同一层网络)
+            self.q_table_dic_0["".join(move_postion)]=self.q_table_dic_0["".join(position)]
+            self.q_table_dic_0["".join(position)]=np.random.randint(0,1,(5,6)).tolist()
+            self.lattice_0[move_postion[0]][move_postion[1]]=self.lattice_0[position[0]][position[1]]
+            self.lattice_0[position[0]][position[1]]=0
+
+
+    def game(self,position):
+        nerbo=self.get_nerbio(position)
+        personal_fit=0
+
+        for item in nerbo:
+            if self.lattice_0[item[0]][item[1]]:
+                if self.lattice_0[position[0]][position[1]]==1 and self.lattice_0[item[0]][item[1]]==1:
+                    personal_fit+=self.R0
+                elif self.lattice_0[position[0]][position[1]]==1 and self.lattice_0[item[0]][item[1]]==2:
+                    personal_fit+=self.S0
+                elif self.lattice_0[position[0]][position[1]]==2 and self.lattice_0[item[0]][item[1]]==2:
+                    personal_fit+=self.P0
+                elif self.lattice_0[position[0]][position[1]]==2 and self.lattice_0[item[0]][item[1]]==1:
+                    personal_fit+=self.T0
+
+        return personal_fit
+
+    def Policy_Update(self,position):
+
+        max_fit_police=["*",-2]
+
+        nerbo = self.get_nerbio(position)
+        for item in nerbo:
+            if self.lattice_0[item[0]][item[1]]:
+                nerbio_fit=self.game(item)
+                if nerbio_fit > max_fit_police[-1]:
+                    max_fit_police[0] = self.lattice_0[item[0]][item[1]]
+                    max_fit_police[1] = nerbio_fit
+        personal_fit=self.game(position)
+        if personal_fit > max_fit_police[-1]:
+            max_fit_police[0] = self.lattice_0[position[0]][position[1]]
+            max_fit_police[1] = personal_fit
+        self.lattice_0[position[0]][position[1]]=max_fit_police[0]
+
+    def q_table_updata(self,position):
+        pass
+
+
+
+
+
+
 
 
 
 
 # [上，下，左，右，复制层，不动]
-
 
 my_lattice=Lattice(3)
 my_lattice.moving([1,2])
