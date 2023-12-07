@@ -19,10 +19,10 @@ class Lattice():
     def __init__(self,nums):
 
         self.L=nums
-        self.lattice_0=np.random.randint(0,3,(self.L,self.L)).tolist()
+        self.lattice_0 = np.random.randint(0, 3, (self.L, self.L)).tolist()
         self.lattice_1 = np.random.randint(0, 3, (self.L, self.L)).tolist()
-        self.q_table_dic_0 = {str(i) +"-"+ str(j): np.random.randint(0, 1, (5, 6)) for i in range(self.L) for j in range(self.L)}
-        self.q_table_dic_1 = {str(i) +"-"+ str(j): np.random.randint(0, 1, (5, 6)) for i in range(self.L) for j in range(self.L)}
+        self.q_table_dic_0 = {str(i) + "-" + str(j): np.random.randint(0, 1, (5, 6)) for i in range(self.L) for j in range(self.L)}
+        self.q_table_dic_1 = {str(i) + "-" + str(j): np.random.randint(0, 1, (5, 6)) for i in range(self.L) for j in range(self.L)}
         self.label_dic = {0:[-1,0],1:[1,0],2:[0,-1],3:[0,1],4:[0,0],5:[0,0]}
         self.eplison = 0.02
         self.R0 = 1
@@ -72,15 +72,14 @@ class Lattice():
     def count_collaborator(self,position,layer):
         nerbio=self.get_nerbio(position)
         collaborator_nums=0
-        none_position=[]
+        none_position = []
 
         for item in nerbio[:4]:
-            if layer[item[0]][item[1]]==1:
-                collaborator_nums+=1
+            if layer[item[0]][item[1]] == 1:
+                collaborator_nums += 1
         for item in nerbio:
             if not layer[item[0]][item[1]]:
                 none_position.append(item)
-
         return collaborator_nums,none_position
 
 
@@ -102,14 +101,10 @@ class Lattice():
             return 4
 
     def find_max_index(self,lst):
-        # 初始化最大数值和索引
         max_value = None
         max_index = None
-        # 遍历列表
         for i, value in enumerate(lst):
-            # 如果当前元素不是"*"且大于最大数值
             if value != "*" and (max_value is None or value > max_value):
-                # 更新最大数值和索引
                 max_value = value
                 max_index = i
         return max_index
@@ -118,7 +113,8 @@ class Lattice():
 
         collaborator_nums = self.count_collaborator(position,self.lattice_0)[0]
         none_position = self.count_collaborator(position,self.lattice_0)[1]
-        position_q_table=self.q_table_dic_0[str(position[0])+str(position[1])]
+
+        position_q_table=self.q_table_dic_0["-".join(position)]
 
         action_set=position_q_table[collaborator_nums]
         candidate_set = ["*"] * len(action_set)
@@ -164,10 +160,7 @@ class Lattice():
             new_state = self.count_collaborator(move_postion, self.lattice_0)
             New_state_parameters = max(self.q_table_dic_0['-'.join(move_postion)][new_state])
 
-
-
         return [move_postion,random_index,candidate_set[random_index],collaborator_nums,New_state_parameters]
-
 
 
     def game(self,position):
@@ -206,7 +199,8 @@ class Lattice():
         pass
 
     def main(self):
-        for epoch in tqdm(range(self.epochs)):
+        for i in tqdm(range(self.epochs)):
+            continue
             pass
 
 
@@ -218,10 +212,3 @@ if __name__ == "__main__":
 
     my_lattice=Lattice(3)
     print(my_lattice.game([1,2]))
-
-
-
-
-
-
-

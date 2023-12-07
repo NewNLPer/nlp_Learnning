@@ -23,7 +23,6 @@ def Cooperation_proportion_derivatives(x, t, punish, b, xi,p):
     piC_p_piD = punish * x[0] * (x[1] + x[2] * p) + x[0] - x[1] * punish - b * x[0] * p
 
 
-
     function_1 = x[0] * ( 1 - x[0] ) * piC_piD
 
     function_2 = xi * x[1] * ( 1 - x[1] ) * -1 * piC_p_piD
