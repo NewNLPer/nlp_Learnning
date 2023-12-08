@@ -43,6 +43,11 @@ class Lattice():
         i=random.randint(0,self.L - 1)
         j=random.randint(0,self.L - 1)
         return [i,j]
+
+
+    def get_idex(self,position):
+        return "-".join(str(item) for item in position)
+
     def Boundary_treatment(self,position_1):
         if 0 <= position_1[0] <= self.L - 1 and 0 <= position_1[1] <= self.L - 1:
             return position_1
@@ -69,18 +74,33 @@ class Lattice():
 
         return nerbio
 
-    def count_collaborator(self,position,layer):
-        nerbio=self.get_nerbio(position)
-        collaborator_nums=0
-        none_position = []
+    def count_collaborator(self,position,state):
 
-        for item in nerbio[:4]:
-            if layer[item[0]][item[1]] == 1:
-                collaborator_nums += 1
-        for item in nerbio:
-            if not layer[item[0]][item[1]]:
-                none_position.append(item)
-        return collaborator_nums,none_position
+        if state == 0:
+            nerbio = self.get_nerbio(position)
+            collaborator_nums = 0
+            none_position = []
+            for item in nerbio[:4]:
+                if self.lattice_0[item[0]][item[1]] == 1:
+                    collaborator_nums += 1
+            for item in nerbio:
+                if not self.lattice_0[item[0]][item[1]]:
+                    none_position.append(item)
+            return collaborator_nums, none_position
+
+        elif state == 1:
+            nerbio = self.get_nerbio(position)
+            collaborator_nums = 0
+            none_position = []
+            for item in nerbio[:4]:
+                if self.lattice_1[item[0]][item[1]] == 1:
+                    collaborator_nums += 1
+            for item in nerbio:
+                if not self.lattice_1[item[0]][item[1]]:
+                    none_position.append(item)
+            return collaborator_nums, none_position
+
+
 
 
 
@@ -111,10 +131,10 @@ class Lattice():
 
     def moving(self,position):
 
-        collaborator_nums = self.count_collaborator(position,self.lattice_0)[0]
-        none_position = self.count_collaborator(position,self.lattice_0)[1]
+        collaborator_nums = self.count_collaborator(position,0)[0]
+        none_position = self.count_collaborator(position,0)[1]
 
-        position_q_table=self.q_table_dic_0["-".join(position)]
+        position_q_table=self.q_table_dic_0[self.get_idex(position)]
 
         action_set=position_q_table[collaborator_nums]
         candidate_set = ["*"] * len(action_set)
@@ -143,24 +163,34 @@ class Lattice():
             self.lattice_1[move_postion[0]][move_postion[1]]=self.lattice_0[position[0]][position[1]]
             self.lattice_0[position[0]][position[1]]=0
 
-            new_state = self.count_collaborator(move_postion, self.lattice_1)[0]
+            new_state = self.count_collaborator(move_postion, 1)[0]
 
             New_state_parameters=max(self.q_table_dic_1['-'.join(move_postion)][new_state])
 
 
         elif random_index==5: # 不动  (同一层网络)
-            new_state = self.count_collaborator(move_postion, self.lattice_0)
-            New_state_parameters = max(self.q_table_dic_0['-'.join(move_postion)][new_state])
+            new_state = self.count_collaborator(move_postion, 0)
+            New_state_parameters = max(self.q_table_dic_0[self.get_idex(move_postion)][new_state])
             pass
         else: # (同一层网络)
-            self.q_table_dic_0["".join(move_postion)]=self.q_table_dic_0["".join(position)]
-            self.q_table_dic_0["".join(position)]=np.random.randint(0,1,(5,6)).tolist()
+            self.q_table_dic_0[self.get_idex(move_postion)]=self.q_table_dic_0[self.get_idex(position)]
+            self.q_table_dic_0[self.get_idex(position)]=np.random.randint(0,1,(5,6)).tolist()
             self.lattice_0[move_postion[0]][move_postion[1]]=self.lattice_0[position[0]][position[1]]
             self.lattice_0[position[0]][position[1]]=0
-            new_state = self.count_collaborator(move_postion, self.lattice_0)
-            New_state_parameters = max(self.q_table_dic_0['-'.join(move_postion)][new_state])
+            new_state = self.count_collaborator(move_postion, 0)[0]
 
-        return [move_postion,random_index,candidate_set[random_index],collaborator_nums,New_state_parameters]
+            print(self.get_idex(move_postion))
+            print(new_state)
+
+            new_state_parameters = max(self.q_table_dic_0[self.get_idex(move_postion)][new_state])
+
+        return {"move_postion":move_postion,
+                "random_index_action":random_index,
+                "q_value":candidate_set[random_index],
+                "collaborator_nums":collaborator_nums,
+                "new_state_parameters":new_state_parameters}
+
+            # [move_postion,random_index,candidate_set[random_index],collaborator_nums,new_state_parameters]
 
 
     def game(self,position):
@@ -206,9 +236,8 @@ class Lattice():
 
 
 
-
 if __name__ == "__main__":
 # [上，下，左，右，复制层，不动]
 
     my_lattice=Lattice(3)
-    print(my_lattice.game([1,2]))
+    print(my_lattice.moving([1,2]))
