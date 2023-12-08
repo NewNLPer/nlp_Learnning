@@ -5,19 +5,15 @@
 coding with comment！！！
 """
 
-import torch
 import random
 import numpy as np
 from tqdm import tqdm
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-print("you are using {} ... ".format(device))
+import time
 
 
 class Lattice():
     def __init__(self,nums):
-
+        # [上，下，左，右，复制层，不动]
         self.L=nums
         self.q_table_dic_0 = {str(i) + "-" + str(j): np.random.randint(0, 1, (5, 6)) for i in range(self.L) for j in range(self.L)}
         self.q_table_dic_1 = {str(i) + "-" + str(j): np.random.randint(0, 1, (5, 6)) for i in range(self.L) for j in range(self.L)}
@@ -31,7 +27,7 @@ class Lattice():
         self.S1 = 0
         self.T0 = 1.3
         self.T1 = 1.3
-        self.epochs = 10000
+        self.epochs = 20000
         self.alpha = 0.1
         self.gamma = 0.9
         self.ro= 0.6
@@ -289,7 +285,7 @@ class Lattice():
     def Policy_Update(self,position,state):
 
         if not state:
-            max_fit_police=["*",-2]
+            max_fit_police=["*",-999]
             nerbo = self.get_nerbio(position)
             for item in nerbo:
                 if self.lattice_0[item[0]][item[1]]:
@@ -301,10 +297,11 @@ class Lattice():
             if personal_fit > max_fit_police[-1]:
                 max_fit_police[0] = self.lattice_0[position[0]][position[1]]
                 max_fit_police[1] = personal_fit
+
             self.lattice_0[position[0]][position[1]]=max_fit_police[0]
 
         elif state:
-            max_fit_police=["*",-2]
+            max_fit_police=["*",-999]
             nerbo = self.get_nerbio(position)
             for item in nerbo:
                 if self.lattice_1[item[0]][item[1]]:
@@ -316,6 +313,7 @@ class Lattice():
             if personal_fit > max_fit_police[-1]:
                 max_fit_police[0] = self.lattice_1[position[0]][position[1]]
                 max_fit_police[1] = personal_fit
+
             self.lattice_1[position[0]][position[1]]=max_fit_police[0]
 
 
@@ -340,6 +338,8 @@ class Lattice():
         for epoch in tqdm(range(self.epochs)):
             while True:
                 position = self.get_someone() # 取点
+
+                # print([self.lattice_0[position[0]][position[1]],self.lattice_1[position[0]][position[1]]])
 
                 if sum([self.lattice_0[position[0]][position[1]],self.lattice_1[position[0]][position[1]]]) > 0 :
                     break
@@ -366,8 +366,11 @@ class Lattice():
 
 if __name__ == "__main__":
 
-# [上，下，左，右，复制层，不动]
 
+    start_time=time.time()
     my_lattice=Lattice(100)
     my_lattice.main()
+    end_time=time.time()
+    print("time comsume :{}".format(end_time-start_time))
+
 
