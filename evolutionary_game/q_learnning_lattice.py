@@ -326,9 +326,9 @@ class Lattice():
                     "max_q_new_state": new_state_parameters}
         """
         if not state:
-            self.q_table_dic_0[self.get_idex(need_dic["move_postion"])][need_dic["ori_collaborator_nums"]][need_dic["random_index_action"]] = ( 1 - self.alpha ) * need_dic["q_value"] + self.alpha * personal_fit + self.gamma * need_dic["max_q_new_state"]
+            self.q_table_dic_0[self.get_idex(need_dic["move_postion"])][need_dic["ori_collaborator_nums"]][need_dic["random_index_action"]] = ( 1 - self.alpha ) * need_dic["q_value"] + self.alpha * (personal_fit + self.gamma * need_dic["max_q_new_state"])
         elif state:
-            self.q_table_dic_1[self.get_idex(need_dic["move_postion"])][need_dic["ori_collaborator_nums"]][need_dic["random_index_action"]] = ( 1 - self.alpha ) * need_dic["q_value"] + self.alpha * personal_fit + self.gamma * need_dic["max_q_new_state"]
+            self.q_table_dic_1[self.get_idex(need_dic["move_postion"])][need_dic["ori_collaborator_nums"]][need_dic["random_index_action"]] = ( 1 - self.alpha ) * need_dic["q_value"] + self.alpha * (personal_fit + self.gamma * need_dic["max_q_new_state"])
 
 
 
