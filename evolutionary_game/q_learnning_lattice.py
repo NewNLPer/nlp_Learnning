@@ -4,7 +4,6 @@
 @time: 2023/12/7 18:00
 coding with comment！！！
 """
-
 import random
 import numpy as np
 from tqdm import tqdm
@@ -365,7 +364,6 @@ class Lattice():
 
 
 if __name__ == "__main__":
-
 
     start_time=time.time()
     my_lattice=Lattice(100)
