@@ -35,8 +35,8 @@ class Lattice():
         self.alpha = 0.1
         self.gamma = 0.9
         self.ro= 0.6
-        self.lattice_0 = np.random.choice([0, 1, 2], size=(self.L, self.L), p=[0.4, 0.3, 0.3]).tolist()
-        self.lattice_1 = np.random.choice([0, 1, 2], size=(self.L, self.L), p=[0.4, 0.3, 0.3]).tolist()
+        self.lattice_0 = np.random.choice([0, 1, 2], size=(self.L, self.L), p=[0.4, 0.3, 0.3]).astype(int).tolist()
+        self.lattice_1 = np.random.choice([0, 1, 2], size=(self.L, self.L), p=[0.4, 0.3, 0.3]).astype(int).tolist()
 
         """
         [上，下，左，右，复制层，不动]
@@ -286,52 +286,88 @@ class Lattice():
 
 
 
+    def Policy_Update(self,position,state):
+
+        if not state:
+            max_fit_police=["*",-2]
+            nerbo = self.get_nerbio(position)
+            for item in nerbo:
+                if self.lattice_0[item[0]][item[1]]:
+                    nerbio_fit=self.game(item,0)
+                    if nerbio_fit > max_fit_police[-1]:
+                        max_fit_police[0] = self.lattice_0[item[0]][item[1]]
+                        max_fit_police[1] = nerbio_fit
+            personal_fit=self.game(position,0)
+            if personal_fit > max_fit_police[-1]:
+                max_fit_police[0] = self.lattice_0[position[0]][position[1]]
+                max_fit_police[1] = personal_fit
+            self.lattice_0[position[0]][position[1]]=max_fit_police[0]
+
+        elif state:
+            max_fit_police=["*",-2]
+            nerbo = self.get_nerbio(position)
+            for item in nerbo:
+                if self.lattice_1[item[0]][item[1]]:
+                    nerbio_fit=self.game(item,1)
+                    if nerbio_fit > max_fit_police[-1]:
+                        max_fit_police[0] = self.lattice_1[item[0]][item[1]]
+                        max_fit_police[1] = nerbio_fit
+            personal_fit=self.game(position,1)
+            if personal_fit > max_fit_police[-1]:
+                max_fit_police[0] = self.lattice_1[position[0]][position[1]]
+                max_fit_police[1] = personal_fit
+            self.lattice_1[position[0]][position[1]]=max_fit_police[0]
 
 
-    def Policy_Update(self,position):
-
-        max_fit_police=["*",-2]
-        nerbo = self.get_nerbio(position)
-        for item in nerbo:
-            if self.lattice_0[item[0]][item[1]]:
-                nerbio_fit=self.game(item)
-                if nerbio_fit > max_fit_police[-1]:
-                    max_fit_police[0] = self.lattice_0[item[0]][item[1]]
-                    max_fit_police[1] = nerbio_fit
-        personal_fit=self.game(position)
-        if personal_fit > max_fit_police[-1]:
-            max_fit_police[0] = self.lattice_0[position[0]][position[1]]
-            max_fit_police[1] = personal_fit
-        self.lattice_0[position[0]][position[1]]=max_fit_police[0]
-
-
-    def q_table_updata(self,position):
-        need_dic = self.moving(position)
-        personal_fit = self.game(position)
+    def q_table_updata(self,need_dic,personal_fit,state):
         """
-        {
-        'move_postion': [2, 2],
-         'random_index_action': 1, 
-         'q_value': 0, 
-         'collaborator_nums': 0, 
-         'new_state_parameters': 0
-         }
+{                   
+                    "move_postion": move_postion,
+                    "random_index_action": random_index,
+                    "q_value": candidate_set[random_index],
+                    "ori_collaborator_nums": collaborator_nums,
+                    "max_q_new_state": new_state_parameters}
         """
-        self.q_table_dic_0[self.get_idex(need_dic["move_postion"])][need_dic["collaborator_nums"]][need_dic["random_index_action"]] = ( 1 - self.alpha ) * need_dic["q_value"] + self.alpha * personal_fit + self.gamma * max(self.q_table_dic_0[self.get_idex(need_dic["move_postion"])][need_dic["new_state_parameters"]])
+        if not state:
+            self.q_table_dic_0[self.get_idex(need_dic["move_postion"])][need_dic["ori_collaborator_nums"]][need_dic["random_index_action"]] = ( 1 - self.alpha ) * need_dic["q_value"] + self.alpha * personal_fit + self.gamma * need_dic["max_q_new_state"]
+        elif state:
+            self.q_table_dic_1[self.get_idex(need_dic["move_postion"])][need_dic["ori_collaborator_nums"]][need_dic["random_index_action"]] = ( 1 - self.alpha ) * need_dic["q_value"] + self.alpha * personal_fit + self.gamma * need_dic["max_q_new_state"]
+
+
 
     def main(self):
-        for i in tqdm(range(self.epochs)):
+        fc_list=[]
+        for epoch in tqdm(range(self.epochs)):
+            while True:
+                position = self.get_someone() # 取点
 
-            position=self.get_someone() # 蒙特卡洛取点
-            need_dic=self.moving(position) # 移动
+                if sum([self.lattice_0[position[0]][position[1]],self.lattice_1[position[0]][position[1]]]) > 0 :
+                    break
+            if self.lattice_0[position[0]][position[1]]:
+                need_dic_0=self.moving(position,0) # 网格0移动
+                benifit_0=self.game(position, 0) # 博弈
+                self.Policy_Update(position,0) # 策略更新
+                self.q_table_updata(need_dic_0,benifit_0,0) # q表更新
 
+            if self.lattice_1[position[0]][position[1]]:
+                need_dic_1=self.moving(position,1) # 网格1移动
+                benifit_1=self.game(position, 1) # 博弈
+                self.Policy_Update(position,1) # 策略更新
+                self.q_table_updata(need_dic_1,benifit_1,1) # q表更新
 
+            fc_0=self.count_c(0)
 
+            fc_1=self.count_c(1)
 
+            fc_list+=[[fc_0,fc_1]]
+
+        print(fc_list)
 
 
 if __name__ == "__main__":
+
 # [上，下，左，右，复制层，不动]
 
-    my_lattice=Lattice(3)
-    print(my_lattice.moving([1,2]))
+    my_lattice=Lattice(100)
+    my_lattice.main()
+
