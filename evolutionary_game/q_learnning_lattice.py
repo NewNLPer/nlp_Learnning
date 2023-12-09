@@ -26,7 +26,7 @@ class Lattice():
         self.S1 = 0
         self.T0 = 1.3
         self.T1 = 1.3
-        self.epochs = 20000
+        self.epochs = 10000
         self.alpha = 0.1
         self.gamma = 0.9
         self.ro= 0.6
@@ -334,31 +334,32 @@ class Lattice():
 
     def main(self):
         fc_list=[]
-        for epoch in tqdm(range(self.epochs)):
-            while True:
-                position = self.get_someone() # 取点
+        for i in tqdm(range(20000)):
+            for epoch in range(self.epochs):
+                while True:
+                    position = self.get_someone() # 取点
 
                 # print([self.lattice_0[position[0]][position[1]],self.lattice_1[position[0]][position[1]]])
 
-                if sum([self.lattice_0[position[0]][position[1]],self.lattice_1[position[0]][position[1]]]) > 0 :
-                    break
-            if self.lattice_0[position[0]][position[1]]:
-                need_dic_0=self.moving(position,0) # 网格0移动
-                benifit_0=self.game(position, 0) # 博弈
-                self.Policy_Update(position,0) # 策略更新
-                self.q_table_updata(need_dic_0,benifit_0,0) # q表更新
+                    if sum([self.lattice_0[position[0]][position[1]],self.lattice_1[position[0]][position[1]]]) > 0 :
+                        break
+                if self.lattice_0[position[0]][position[1]]:
+                    need_dic_0=self.moving(position,0) # 网格0移动
+                    benifit_0=self.game(position, 0) # 博弈
+                    self.Policy_Update(position,0) # 策略更新
+                    self.q_table_updata(need_dic_0,benifit_0,0) # q表更新
 
-            if self.lattice_1[position[0]][position[1]]:
-                need_dic_1=self.moving(position,1) # 网格1移动
-                benifit_1=self.game(position, 1) # 博弈
-                self.Policy_Update(position,1) # 策略更新
-                self.q_table_updata(need_dic_1,benifit_1,1) # q表更新
+                if self.lattice_1[position[0]][position[1]]:
+                    need_dic_1=self.moving(position,1) # 网格1移动
+                    benifit_1=self.game(position, 1) # 博弈
+                    self.Policy_Update(position,1) # 策略更新
+                    self.q_table_updata(need_dic_1,benifit_1,1) # q表更新
 
-            fc_0=self.count_c(0)
+            #     fc_0=self.count_c(0)
+            #
+            # fc_1=self.count_c(1)
 
-            fc_1=self.count_c(1)
-
-            fc_list+=[[fc_0,fc_1]]
+            # fc_list+=[[fc_0,fc_1]]
 
         print(fc_list)
 
