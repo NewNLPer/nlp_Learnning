@@ -88,24 +88,18 @@ def get_round(list):
 
 if __name__=="__main__":
 
-
-    initial_x=[0.5, 0.5 , 0.5]
-    t = np.linspace(0, 2000, 2000)
+    initial_x=[0.5,0.5,0.5]
+    t = np.linspace(0,2000,2000)
     punish = 0.1
     xi = 0.01
     p_1 = 0.5
     p_2 = 1.5
 
-
     result_=[]
 
     line_space_b=linespace(1,2,0.0001)
     for b in tqdm(line_space_b):
-        # remark=get_remark(b,punish,xi,p_1,p_2)
-        """
-        round(3)
-        
-        """
+
         result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(punish, b, xi,p_1,p_2))
         result_.append(get_round(result[-1].tolist()))
 
