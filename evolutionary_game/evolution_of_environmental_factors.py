@@ -7,6 +7,10 @@ coding with comment！！！
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import odeint
+import time
+
+
+
 
 def Cooperation_proportion_derivatives(x, t, punish, b, xi, p_1, p_2):
     """
@@ -32,11 +36,8 @@ def Cooperation_proportion_derivatives(x, t, punish, b, xi, p_1, p_2):
 def get_plot(x,t,remark):
 
     Collaborator_ratio= [sublist[0] for sublist in x]
-
     C_Perceived_degree=[sublist[1] for sublist in x]
-
     D_Perceived_degree = [sublist[2] for sublist in x]
-
 
     plt.figure(figsize=(12, 12))
 
@@ -63,15 +64,31 @@ def get_plot(x,t,remark):
     plt.savefig(r'C:/Users/NewNLPer/Desktop/za/exp_figure/{}.png'.format(remark))
     plt.show()
 
+
 def get_remark(b,punish,xi,p_1,p_2):
 
     remark="b={}_punish={}_xi={}_p1={}_p2={}".format(b,punish,xi,p_1,p_2)
 
     return remark
 
+def linespace(start,end,interval):
+
+    float_lens=len(str(interval).split(".")[-1])
+    print(float_lens)
+    save_list=[]
+    while start<=end:
+        save_list.append(start)
+        start+=interval
+        start=round(start,float_lens)
+    if save_list[-1] != end:
+        save_list.append(end)
+    return save_list
+
+
 
 if __name__=="__main__":
 
+    start_time=time.time()
     initial_x=[0.5, 0.5 , 0.5]
     t = np.linspace(0, 2000, 2000)
     punish = 0.5
@@ -81,6 +98,8 @@ if __name__=="__main__":
     p_2 = 1.5
     remark=get_remark(b,punish,xi,p_1,p_2)
     result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(punish, b, xi,p_1,p_2))
+    end_time=time.time()
+    print("time consume : {}".format(end_time-start_time))
     get_plot(result,t,remark)
 
 
