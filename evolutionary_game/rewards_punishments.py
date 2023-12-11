@@ -10,6 +10,16 @@ coding with comment！！！
 @time: 2023/12/6 14:52
 coding with comment！！！
 """
+
+
+
+
+
+"""
+1.时间演化图
+2.随便变化图
+
+"""
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import odeint
