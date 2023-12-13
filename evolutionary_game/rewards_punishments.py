@@ -65,9 +65,6 @@ def plot_variogram(x,b):
     # plt.savefig(r'C:/Users/NewNLPer/Desktop/za/exp_figure/{}.png'.format(remark))
     # plt.show()
 
-def get_remark(b,punish,xi):
-    remark="b={}_punish={}_xi={}".format(b,punish,xi)
-    return remark
 
 def linespace(start,end,interval):
 
