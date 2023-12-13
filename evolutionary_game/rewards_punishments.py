@@ -83,16 +83,17 @@ def get_round(list):
     return [round(item,3) for item in list]
 
 if __name__=="__main__":
-    initial_x = [0.5, 0.01]
+    initial_x = [0.5, 0.1]
     t = np.linspace(0, 200000, 200000)
-    punish = 0.1
+    punish = 1
     xi = 0.01
 
 
-    # 1. 固定背叛诱惑b的时间演化图
-    b = 1.5
-    result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(punish, b, xi))
-    plot_Time_evolution_chart(result,t)
+    # # 1. 固定背叛诱惑b的时间演化图
+    # b = 1.5
+    # result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(punish, b, xi))
+    # plot_Time_evolution_chart(result,t)
+    # print(result[-1])
 
    # 2. 背叛诱惑b变量的演化图
     result_finally=[]
@@ -101,6 +102,7 @@ if __name__=="__main__":
         result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(punish, b, xi))
         result_finally.append(get_round(result[-1].tolist()))
     plot_variogram(result_finally, line_space_b)
+
 
 
 
