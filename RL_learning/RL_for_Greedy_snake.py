@@ -11,6 +11,11 @@ Speak something clearly
 import pygame
 import sys
 import random
+import torch
+import torch.nn as nn
+
+
+
 
 # 初始化
 pygame.init()
@@ -18,13 +23,13 @@ pygame.init()
 # 游戏参数
 WIDTH, HEIGHT = 400, 400
 GRID_SIZE = 20
-FPS = 15
+FPS = 19
 
 # 颜色定义
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
-
+BLUE = (0, 0, 255)
 # 游戏类
 class SnakeGame:
     def __init__(self):
@@ -56,8 +61,13 @@ class SnakeGame:
             pygame.draw.line(self.screen, WHITE, (0, y), (self.width, y))
 
     def draw_snake(self):
-        for segment in self.snake:
-            pygame.draw.rect(self.screen, GREEN, (segment[0], segment[1], self.grid_size, self.grid_size))
+        for i in range(len(self.snake)):
+            if not i:
+                pygame.draw.rect(self.screen, BLUE, (self.snake[i][0], self.snake[i][1], self.grid_size, self.grid_size))
+            else:
+                pygame.draw.rect(self.screen, GREEN,(self.snake[i][0], self.snake[i][1], self.grid_size, self.grid_size))
+        # for segment in self.snake:
+        #     pygame.draw.rect(self.screen, GREEN, (segment[0], segment[1], self.grid_size, self.grid_size))
 
     def draw_food(self):
         pygame.draw.rect(self.screen, RED, (self.food[0], self.food[1], self.grid_size, self.grid_size))
