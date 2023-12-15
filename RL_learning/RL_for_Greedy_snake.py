@@ -13,7 +13,7 @@ import sys
 import random
 import torch
 import torch.nn as nn
-
+import numpy as np
 
 
 
@@ -22,14 +22,14 @@ pygame.init()
 
 # 游戏参数
 WIDTH, HEIGHT = 400, 400
-GRID_SIZE = 20
-FPS = 19
+GRID_SIZE = 10
+FPS = 1
 
 # 颜色定义
 WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
+food_color = (255, 0, 0)
+snake_body = (237, 145, 33)
+snake_head = (255, 215, 0)
 # 游戏类
 class SnakeGame:
     def __init__(self):
@@ -63,14 +63,14 @@ class SnakeGame:
     def draw_snake(self):
         for i in range(len(self.snake)):
             if not i:
-                pygame.draw.rect(self.screen, BLUE, (self.snake[i][0], self.snake[i][1], self.grid_size, self.grid_size))
+                pygame.draw.rect(self.screen, snake_head, (self.snake[i][0], self.snake[i][1], self.grid_size, self.grid_size))
             else:
-                pygame.draw.rect(self.screen, GREEN,(self.snake[i][0], self.snake[i][1], self.grid_size, self.grid_size))
+                pygame.draw.rect(self.screen, snake_body,(self.snake[i][0], self.snake[i][1], self.grid_size, self.grid_size))
         # for segment in self.snake:
         #     pygame.draw.rect(self.screen, GREEN, (segment[0], segment[1], self.grid_size, self.grid_size))
 
     def draw_food(self):
-        pygame.draw.rect(self.screen, RED, (self.food[0], self.food[1], self.grid_size, self.grid_size))
+        pygame.draw.rect(self.screen, food_color, (self.food[0], self.food[1], self.grid_size, self.grid_size))
 
     def check_collision(self):
         head = self.snake[0]
@@ -102,7 +102,7 @@ class SnakeGame:
 
     def step(self, action):
         self.move_snake(action)
-
+        print(self.snake)
         if self.check_collision():
             return False  # 游戏结束
 
@@ -116,6 +116,14 @@ class SnakeGame:
         return True  # 游戏继续
 
 
+    def get_snake_state(self):
+        matrix = np.zeros((40, 40)).tolist()
+        for item in self.snake:
+            matrix[int(item[0] / 10)][int(item[1] / 10)] = 1
+        matrix[int(self.food[0] / 10)][int(self.food[1] / 10)] = 2
+        return matrix
+
+
 def main():
     game = SnakeGame()
     while True:
@@ -124,21 +132,32 @@ def main():
                 pygame.quit()
                 sys.exit()
 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP]:
-            action = 1
-        elif keys[pygame.K_DOWN]:
-            action = 2
-        elif keys[pygame.K_LEFT]:
-            action = 3
-        elif keys[pygame.K_RIGHT]:
-            action = 4
-        else:
-            action = 0
 
-        if not game.step(action):
-            print("游戏结束！")
+        nums=random.randint(1,4)
+        st=game.step(nums)
+        print(game.get_snake_state())
+        if not st:
             break
+
+
+        # keys = pygame.key.get_pressed()
+        # if keys[pygame.K_UP]:
+        #     action = 1
+        # elif keys[pygame.K_DOWN]:
+        #     action = 2
+        # elif keys[pygame.K_LEFT]:
+        #     action = 3
+        # elif keys[pygame.K_RIGHT]:
+        #     action = 4
+        # else:
+        #     action = 0
+        #
+        # if not game.step(action):
+        #     print("游戏结束！")
+        #     break
 
 if __name__ == "__main__":
     main()
+
+
+
