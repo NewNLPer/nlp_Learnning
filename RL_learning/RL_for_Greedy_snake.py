@@ -16,7 +16,8 @@ import torch.nn as nn
 import numpy as np
 
 
-
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print('You are using: ' + str(device) + '...')
 # 初始化
 pygame.init()
 
@@ -132,29 +133,57 @@ class SnakeGame:
 
 
 
+class DQN_TP(nn.Module):
+    def __init__(self,input_dim,out_dim):
+        """
+        :param input_dim: 40*40
+        :param out_dim: action_choose (up 1,down 2,left 3,right 4)
+        """
+        super(DQN_TP, self).__init__()
+        self.hidden_dim = 100
+        self.action_choose = out_dim
+        self.relu = nn.ReLU()
+        self.get_norm = nn.Softmax()
+        self.MLP_1 = nn.Linear(input_dim,self.hidden_dim)
+        self.MLP_2 = nn.Linear(input_dim*self.hidden_dim,self.action_choose)
+
+    def forward(self, state):
+        """
+        :param self:
+        :param state:give snake state to get argmax_Q* -> action
+        :return: every action to Q_value
+        """
+        hidden_vc = self.MLP_1(state)
+        ac_hidden_vc = self.relu(hidden_vc)
+        ac_hidden_vc = torch.unsqueeze(torch.flatten(ac_hidden_vc),0)
+        logits = self.get_norm(self.MLP_2(ac_hidden_vc))
+        return logits
 
 
 
 
+my_model = DQN_TP(40,4).cuda()
+
+data=torch.randn(40, 40).cuda()
+
+print(my_model(data))
 
 
 
-
-
-def main():
-    game = SnakeGame()
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-        print("原始状态：",game.get_snake_state())
-        nums=random.randint(1,4)
-        reward=game.step(nums)
-        print("目前状态：",game.get_snake_state())
-        print("当前状态下做出action所得出的奖励：",reward)
-        exit()
+# def main():
+#     game = SnakeGame()
+#     while True:
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+#                 sys.exit()
+#
+#         print("原始状态：",game.get_snake_state())
+#         nums=random.randint(1,4)
+#         reward=game.step(nums)
+#         print("目前状态：",game.get_snake_state())
+#         print("当前状态下做出action所得出的奖励：",reward)
+#         exit()
         # print(st)
         # if st == -5:
         #     break
@@ -176,8 +205,8 @@ def main():
         #     print("游戏结束！")
         #     break
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
 
 
 
