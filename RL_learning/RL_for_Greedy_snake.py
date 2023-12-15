@@ -23,7 +23,7 @@ pygame.init()
 # 游戏参数
 WIDTH, HEIGHT = 400, 400
 GRID_SIZE = 10
-FPS = 1
+FPS = 20
 
 # 颜色定义
 WHITE = (255, 255, 255)
@@ -101,10 +101,17 @@ class SnakeGame:
             self.snake.pop()
 
     def step(self, action):
+        reward=0
+
+        len_ori = len(self.snake)
         self.move_snake(action)
-        print(self.snake)
-        if self.check_collision():
-            return False  # 游戏结束
+        len_now = len(self.snake)
+
+        if len_now - len_ori: # 吃到食物，应该得到奖励
+            reward = 5
+        if self.check_collision(): # 吃到自己或者碰到墙
+            reward = -5
+            # return False  # 游戏结束
 
         self.screen.fill((0, 0, 0))
         self.draw_grid()
@@ -113,8 +120,8 @@ class SnakeGame:
 
         pygame.display.flip()
         self.clock.tick(self.fps)
-        return True  # 游戏继续
-
+        # return True  # 游戏继续
+        return reward
 
     def get_snake_state(self):
         matrix = np.zeros((40, 40)).tolist()
@@ -122,6 +129,16 @@ class SnakeGame:
             matrix[int(item[0] / 10)][int(item[1] / 10)] = 1
         matrix[int(self.food[0] / 10)][int(self.food[1] / 10)] = 2
         return matrix
+
+
+
+
+
+
+
+
+
+
 
 
 def main():
@@ -132,12 +149,15 @@ def main():
                 pygame.quit()
                 sys.exit()
 
-
+        print("原始状态：",game.get_snake_state())
         nums=random.randint(1,4)
-        st=game.step(nums)
-        print(game.get_snake_state())
-        if not st:
-            break
+        reward=game.step(nums)
+        print("目前状态：",game.get_snake_state())
+        print("当前状态下做出action所得出的奖励：",reward)
+        exit()
+        # print(st)
+        # if st == -5:
+        #     break
 
 
         # keys = pygame.key.get_pressed()
