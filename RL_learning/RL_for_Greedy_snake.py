@@ -9,12 +9,13 @@ coding with comment！！！
 Speak something clearly
 """
 import pygame
-import sys
 import random
 import torch
 import torch.nn as nn
 import numpy as np
-
+import time
+from tqdm import tqdm
+import sys
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print('You are using: ' + str(device) + '...')
@@ -31,6 +32,9 @@ WHITE = (255, 255, 255)
 food_color = (255, 0, 0)
 snake_body = (237, 145, 33)
 snake_head = (255, 215, 0)
+discount_factor = 0.5
+play_iter = 100000
+
 # 游戏类
 class SnakeGame:
     def __init__(self):
@@ -125,13 +129,18 @@ class SnakeGame:
         return reward
 
     def get_snake_state(self):
+
         matrix = np.zeros((40, 40)).tolist()
+
         for item in self.snake:
+
+            # print([int(item[0] / 10)][int(item[1] / 10)])
+
             matrix[int(item[0] / 10)][int(item[1] / 10)] = 1
+
         matrix[int(self.food[0] / 10)][int(self.food[1] / 10)] = 2
+
         return matrix
-
-
 
 class DQN_TP(nn.Module):
     def __init__(self,input_dim,out_dim):
@@ -160,17 +169,68 @@ class DQN_TP(nn.Module):
         return logits
 
 
+if __name__ == "__main__":
+
+    RL_model = DQN_TP(40, 4).cuda()
+    optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.00001)
+    Loss_function = nn.MSELoss()
+    for iter in tqdm(range(play_iter)):
+        game = SnakeGame()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            state_t = torch.Tensor(game.get_snake_state()).cuda()
+
+            logits_t = RL_model(state_t)
+
+            q_t_for_a_t = float(logits_t.max())
+
+            action_t = int(logits_t.argmax()) + 1
 
 
-my_model = DQN_TP(40,4).cuda()
+            reward_t = game.step(action_t)
 
-data=torch.randn(40, 40).cuda()
+            if reward_t == -5:
+                Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward_t + 0]))
 
-print(my_model(data))
+                Loss_for_RL.requires_grad_(True)
+
+                optimizer.zero_grad()
+
+                Loss_for_RL.backward()
+
+                optimizer.step()
+                print("epoch : {}，loss : {}".format(iter,Loss_for_RL.item()))
+
+                break
+
+            state_t_1 = torch.Tensor(game.get_snake_state()).cuda()
+
+            max_q_t_1 = float(RL_model(state_t_1).max())
+
+            Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward_t + discount_factor * max_q_t_1]))
+
+            Loss_for_RL.requires_grad_(True)
+
+            optimizer.zero_grad()
+
+            Loss_for_RL.backward()
+
+            optimizer.step()
+
+            print("epoch : {}，loss : {}".format(iter,Loss_for_RL.item()))
 
 
 
-# def main():
+
+# RL_model = DQN_TP(40,4).cuda()
+#
+#
+#
+# # def main():
 #     game = SnakeGame()
 #     while True:
 #         for event in pygame.event.get():
