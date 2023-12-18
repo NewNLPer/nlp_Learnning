@@ -35,7 +35,7 @@ WHITE = (255, 255, 255)
 food_color = (255, 0, 0)
 snake_body = (237, 145, 33)
 snake_head = (255, 215, 0)
-discount_factor = 0.9
+discount_factor = 0.78
 play_iter = 100000
 
 # 游戏类
@@ -50,10 +50,8 @@ class SnakeGame:
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("贪吃蛇游戏")
         self.snake = [(100, 100), (80, 100), (80, 100)]
-
-
-
-        self.direction = (1, 0)  # 初始方向向右
+        nums = random.randint(1,4)
+        self.direction = ban_dic[nums]  # 初始方向向右
         self.food = self.generate_food()
 
 
@@ -142,7 +140,7 @@ class SnakeGame:
             reward -= 2
             return [False , reward]
         elif new_lens > old_lens: # 如果吃到果实
-            reward += 5
+            reward += 3
             return [True , reward]
         else: # 啥也没发生，仅仅是移动，需要考虑其余食物的距离来计算间接奖励
             old_dis = self.compute_direction(old_head,self.food)
@@ -179,12 +177,12 @@ class SnakeGame:
                     init_state[i][j] = -1
         for i in range(len(self.snake)):
             if not i:
-                init_state[int(self.snake[0][0] / 20)][int(self.snake[0][1] / 20)] = 1
+                init_state[int(self.snake[i][0] / 20)][int(self.snake[i][1] / 20)] = 1
             else:
-                init_state[int(self.snake[0][0] / 20)][int(self.snake[0][1] / 20)] = 2
+                init_state[int(self.snake[i][0] / 20)][int(self.snake[i][1] / 20)] = 2
         init_state[int(self.food[0] / 20)][int(self.food[1] / 20)] = 3
-
         return init_state,self.direction
+
 
 
 class DQN_TP(nn.Module):
@@ -194,12 +192,11 @@ class DQN_TP(nn.Module):
         :param out_dim: action_choose (up 1,down 2,left 3,right 4)
         """
         super(DQN_TP, self).__init__()
-        self.hidden_dim = 64
+        self.hidden_dim = 128
         self.action_choose = out_dim
         self.relu = nn.ReLU()
-        self.get_norm = nn.Softmax()
         self.MLP_1 = nn.Linear(input_dim,self.hidden_dim)
-        self.MLP_2 = nn.Linear(input_dim*self.hidden_dim,self.action_choose)
+        self.MLP_2 = nn.Linear(input_dim * self.hidden_dim,self.action_choose)
 
     def forward(self, state):
         """
@@ -210,14 +207,14 @@ class DQN_TP(nn.Module):
         hidden_vc = self.MLP_1(state)
         ac_hidden_vc = self.relu(hidden_vc)
         ac_hidden_vc = torch.unsqueeze(torch.flatten(ac_hidden_vc),0)
-        logits = self.get_norm(self.MLP_2(ac_hidden_vc))
+        logits = self.MLP_2(ac_hidden_vc)
         return logits
 
 
 if __name__ == "__main__":
 
     RL_model = DQN_TP(20, 4).cuda()
-    optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.00001)
+    optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.01)
     Loss_function = nn.MSELoss()
     for iter in tqdm(range(play_iter)):
         game = SnakeGame()
@@ -228,7 +225,9 @@ if __name__ == "__main__":
                     sys.exit()
 
             state_t,direction = game.get_snake_state()
+
             state_t = torch.unsqueeze(torch.Tensor(state_t),0).cuda()
+
             logits_t = RL_model(state_t)
             # q_t_for_a_t = float(logits_t.max())
             condidate_action = game.get_sort_dic(logits_t)
@@ -237,9 +236,10 @@ if __name__ == "__main__":
                     q_t_for_a_t = condidate_action[key]
                     reward_t = game.step(key)
                     break
+
             reward = reward_t[-1]
             if not reward_t[0]:
-                Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward_t[1] - 3]))
+                Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward - 2]))
                 Loss_for_RL.requires_grad_(True)
                 optimizer.zero_grad()
                 Loss_for_RL.backward()
@@ -249,7 +249,7 @@ if __name__ == "__main__":
             else:
                 state_t_1 = torch.unsqueeze(torch.Tensor(game.get_snake_state()[0]),0).cuda()
                 max_q_t_1 = float(RL_model(state_t_1).max())
-                Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward_t[1] + discount_factor * max_q_t_1]))
+                Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward + discount_factor * max_q_t_1]))
                 Loss_for_RL.requires_grad_(True)
                 optimizer.zero_grad()
                 Loss_for_RL.backward()
