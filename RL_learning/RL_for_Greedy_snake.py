@@ -33,12 +33,13 @@ WHITE = (255, 255, 255)
 food_color = (255, 0, 0)
 snake_body = (237, 145, 33)
 snake_head = (255, 215, 0)
-discount_factor = 0.95
+discount_factor = 0.5
 play_iter = 100000
 
 # 游戏类
 class SnakeGame:
     def __init__(self):
+        pygame.init()
         self.width = WIDTH
         self.height = HEIGHT
         self.grid_size = GRID_SIZE
@@ -121,6 +122,14 @@ class SnakeGame:
         self.move_snake(action)
         new_head = self.snake[0]
         new_lens = len(self.snake)
+        self.screen.fill((0, 0, 0))
+        self.draw_grid()
+        self.draw_snake()
+        self.draw_food()
+
+        pygame.display.flip()
+        self.clock.tick(self.fps)
+
         if self.check_collision(): # 吃到自己或者碰到墙
             reward -= 0.5
             return [False , reward]
@@ -130,7 +139,7 @@ class SnakeGame:
         else: # 啥也没发生，仅仅是移动，需要考虑其余食物的距离来计算间接奖励
             old_dis = self.compute_direction(old_head,self.food)
             new_dis = self.compute_direction(new_head,self.food)
-            reward += (old_dis - new_dis) / 10
+            reward += (old_dis - new_dis) / 100
             return [True , reward]
 
 
@@ -148,12 +157,12 @@ class DQN_TP(nn.Module):
         :param out_dim: action_choose (up 1,down 2,left 3,right 4)
         """
         super(DQN_TP, self).__init__()
-        self.hidden_dim = 10
+        self.hidden_dim = 100
         self.action_choose = out_dim
         self.relu = nn.ReLU()
         self.get_norm = nn.Softmax()
         self.MLP_1 = nn.Linear(input_dim,self.hidden_dim)
-        self.MLP_2 = nn.Linear(input_dim*self.hidden_dim,self.action_choose)
+        self.MLP_2 = nn.Linear(self.hidden_dim,self.action_choose)
 
     def forward(self, state):
         """
@@ -189,7 +198,7 @@ if __name__ == "__main__":
             reward_t = game.step(action_t)
 
             if not reward_t[0]:
-                Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward_t[1] + 0]))
+                Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward_t[1] - 5]))
                 Loss_for_RL.requires_grad_(True)
                 optimizer.zero_grad()
                 Loss_for_RL.backward()
