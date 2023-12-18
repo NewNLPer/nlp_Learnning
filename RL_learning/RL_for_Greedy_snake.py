@@ -16,6 +16,7 @@ import numpy as np
 import time
 from tqdm import tqdm
 import sys
+import math
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print('You are using: ' + str(device) + '...')
@@ -24,7 +25,7 @@ pygame.init()
 
 # 游戏参数
 WIDTH, HEIGHT = 400, 400
-GRID_SIZE = 10
+GRID_SIZE = 20
 FPS = 20
 
 # 颜色定义
@@ -48,7 +49,7 @@ class SnakeGame:
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("贪吃蛇游戏")
 
-        self.snake = [(100, 100), (90, 100), (80, 100)]
+        self.snake = [(100, 100), (80, 100), (80, 100)]
         self.direction = (1, 0)  # 初始方向向右
         self.food = self.generate_food()
 
@@ -105,51 +106,49 @@ class SnakeGame:
         else:
             self.snake.pop()
 
+
+    def compute_direction(self,point1,point2):
+        x1, y1 = point1
+        x2, y2 = point2
+        distance = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+        return distance
+
+
     def step(self, action):
         reward=0
-
-        len_ori = len(self.snake)
+        old_head = self.snake[0]
+        old_lens = len(self.snake)
         self.move_snake(action)
-        len_now = len(self.snake)
-
-        if len_now - len_ori: # 吃到食物，应该得到奖励
-            reward = 5
+        new_head = self.snake[0]
+        new_lens = len(self.snake)
         if self.check_collision(): # 吃到自己或者碰到墙
-            reward = -5
-            # return False  # 游戏结束
+            reward -= 0.5
+            return [False , reward]
+        elif new_lens > old_lens: # 如果吃到果实
+            reward += 2
+            return [True , reward]
+        else: # 啥也没发生，仅仅是移动，需要考虑其余食物的距离来计算间接奖励
+            old_dis = self.compute_direction(old_head,self.food)
+            new_dis = self.compute_direction(new_head,self.food)
+            reward += (old_dis - new_dis) / 10
+            return [True , reward]
 
-        self.screen.fill((0, 0, 0))
-        self.draw_grid()
-        self.draw_snake()
-        self.draw_food()
-
-        pygame.display.flip()
-        self.clock.tick(self.fps)
-        # return True  # 游戏继续
-        return reward
 
     def get_snake_state(self):
+        state_t = []
+        state_t.append(self.food[0] - self.snake[0][0])
+        state_t.append(self.food[1] - self.snake[0][1])
+        return state_t
 
-        matrix = np.zeros((40, 40)).tolist()
-
-        for item in self.snake:
-
-            # print([int(item[0] / 10)][int(item[1] / 10)])
-
-            matrix[int(item[0] / 10)][int(item[1] / 10)] = 1
-
-        matrix[int(self.food[0] / 10)][int(self.food[1] / 10)] = 2
-
-        return matrix
 
 class DQN_TP(nn.Module):
     def __init__(self,input_dim,out_dim):
         """
-        :param input_dim: 40*40
+        :param input_dim: 2
         :param out_dim: action_choose (up 1,down 2,left 3,right 4)
         """
         super(DQN_TP, self).__init__()
-        self.hidden_dim = 5
+        self.hidden_dim = 10
         self.action_choose = out_dim
         self.relu = nn.ReLU()
         self.get_norm = nn.Softmax()
@@ -162,6 +161,7 @@ class DQN_TP(nn.Module):
         :param state:give snake state to get argmax_Q* -> action
         :return: every action to Q_value
         """
+
         hidden_vc = self.MLP_1(state)
         ac_hidden_vc = self.relu(hidden_vc)
         ac_hidden_vc = torch.unsqueeze(torch.flatten(ac_hidden_vc),0)
@@ -171,7 +171,7 @@ class DQN_TP(nn.Module):
 
 if __name__ == "__main__":
 
-    RL_model = DQN_TP(40, 4).cuda()
+    RL_model = DQN_TP(2, 4).cuda()
     optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.00001)
     Loss_function = nn.MSELoss()
     for iter in tqdm(range(play_iter)):
@@ -182,46 +182,29 @@ if __name__ == "__main__":
                     pygame.quit()
                     sys.exit()
 
-            state_t = torch.Tensor(game.get_snake_state()).cuda()
-
+            state_t = torch.unsqueeze(torch.Tensor(game.get_snake_state()),0).cuda()
             logits_t = RL_model(state_t)
-
             q_t_for_a_t = float(logits_t.max())
-
             action_t = int(logits_t.argmax()) + 1
-
-
             reward_t = game.step(action_t)
 
-            if reward_t == -5:
-                Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward_t + 0]))
-
+            if not reward_t[0]:
+                Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward_t[1] + 0]))
                 Loss_for_RL.requires_grad_(True)
-
                 optimizer.zero_grad()
-
                 Loss_for_RL.backward()
-
                 optimizer.step()
                 print("epoch : {}，loss : {}".format(iter,Loss_for_RL.item()))
-
                 break
-
-            state_t_1 = torch.Tensor(game.get_snake_state()).cuda()
-
-            max_q_t_1 = float(RL_model(state_t_1).max())
-
-            Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward_t + discount_factor * max_q_t_1]))
-
-            Loss_for_RL.requires_grad_(True)
-
-            optimizer.zero_grad()
-
-            Loss_for_RL.backward()
-
-            optimizer.step()
-
-            print("epoch : {}，loss : {}".format(iter,Loss_for_RL.item()))
-
+            else:
+                state_t_1 = torch.unsqueeze(torch.Tensor(game.get_snake_state()),0).cuda()
+                max_q_t_1 = float(RL_model(state_t_1).max())
+                Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward_t[1] + discount_factor * max_q_t_1]))
+                Loss_for_RL.requires_grad_(True)
+                optimizer.zero_grad()
+                Loss_for_RL.backward()
+                optimizer.step()
+                print("epoch : {}，loss : {}".format(iter,Loss_for_RL.item()))
+#
 
 
