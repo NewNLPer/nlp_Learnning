@@ -27,6 +27,8 @@ pygame.init()
 WIDTH, HEIGHT = 400, 400
 GRID_SIZE = 20
 FPS = 20
+ban_dic={1:(0,1),2:(0,-1),3:(1,0),4:(-1,0)}
+
 
 # 颜色定义
 WHITE = (255, 255, 255)
@@ -44,15 +46,16 @@ class SnakeGame:
         self.height = HEIGHT
         self.grid_size = GRID_SIZE
         self.fps = FPS
-
         self.clock = pygame.time.Clock()
-
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("贪吃蛇游戏")
-
         self.snake = [(100, 100), (80, 100), (80, 100)]
+
+
+
         self.direction = (1, 0)  # 初始方向向右
         self.food = self.generate_food()
+
 
     def generate_food(self):
         while True:
@@ -88,16 +91,20 @@ class SnakeGame:
         return False
 
     def move_snake(self, action):
-        if action == 1 and self.direction != (0, 1):  # 上
+        if action == 1 and self.direction != (0, 1):  # 下
             self.direction = (0, -1)
-        elif action == 2 and self.direction != (0, -1):  # 下
+        elif action == 2 and self.direction != (0, -1):  # 上
             self.direction = (0, 1)
         elif action == 3 and self.direction != (1, 0):  # 左
             self.direction = (-1, 0)
         elif action == 4 and self.direction != (-1, 0):  # 右
             self.direction = (1, 0)
         else:
-            print("出现错误方向")
+            print("=============== 出现错误方向 ==================")
+            print(self.direction)
+            print(action)
+            print("=====================================")
+            exit()
         new_head = (self.snake[0][0] + self.direction[0] * self.grid_size,
                     self.snake[0][1] + self.direction[1] * self.grid_size)
 
@@ -132,7 +139,7 @@ class SnakeGame:
         self.clock.tick(self.fps)
 
         if self.check_collision(): # 吃到自己或者碰到墙
-            reward -= 3
+            reward -= 2
             return [False , reward]
         elif new_lens > old_lens: # 如果吃到果实
             reward += 5
@@ -142,8 +149,18 @@ class SnakeGame:
             new_dis = self.compute_direction(new_head,self.food)
             print("old",old_dis)
             print("new ",new_dis)
-            reward += (old_dis - new_dis) / 100
+            reward += (old_dis - new_dis) / 200
             return [True , reward]
+
+    def get_sort_dic(self,logits):
+        candidate_action = {}
+        list_from_tensor = logits[0].tolist()
+        for i in range(len(list_from_tensor)):
+            candidate_action[i + 1] = list_from_tensor[i]
+        sorted_items = sorted(candidate_action.items(), key=lambda x: x[1], reverse=True)
+        sorted_dict = dict(sorted_items)
+        return sorted_dict
+
 
 
     def get_snake_state(self):
@@ -179,7 +196,7 @@ class DQN_TP(nn.Module):
         :param out_dim: action_choose (up 1,down 2,left 3,right 4)
         """
         super(DQN_TP, self).__init__()
-        self.hidden_dim = 64
+        self.hidden_dim = 128
         self.action_choose = out_dim
         self.relu = nn.ReLU()
         self.get_norm = nn.Softmax()
@@ -202,7 +219,7 @@ class DQN_TP(nn.Module):
 if __name__ == "__main__":
 
     RL_model = DQN_TP(20, 4).cuda()
-    optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.00003)
+    optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.0000001)
     Loss_function = nn.MSELoss()
     for iter in tqdm(range(play_iter)):
         game = SnakeGame()
@@ -212,27 +229,20 @@ if __name__ == "__main__":
                     pygame.quit()
                     sys.exit()
 
-
             state_t,direction = game.get_snake_state()
             print("方向",direction)
             state_t = torch.unsqueeze(torch.Tensor(state_t),0).cuda()
             logits_t = RL_model(state_t)
-            q_t_for_a_t = float(logits_t.max())
-            action_t = int(logits_t.argmax()) + 1
-
-
-
-
-
-            reward_t = game.step(action_t)
-
-
-
-
-
+            # q_t_for_a_t = float(logits_t.max())
+            condidate_action = game.get_sort_dic(logits_t)
+            for key in condidate_action:
+                if ban_dic[key] != direction:
+                    q_t_for_a_t = condidate_action[key]
+                    reward_t = game.step(key)
+                    break
             reward = reward_t[-1]
             if not reward_t[0]:
-                Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward_t[1] - 4]))
+                Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward_t[1] - 3]))
                 Loss_for_RL.requires_grad_(True)
                 optimizer.zero_grad()
                 Loss_for_RL.backward()
