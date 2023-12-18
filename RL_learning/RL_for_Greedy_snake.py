@@ -32,7 +32,7 @@ WHITE = (255, 255, 255)
 food_color = (255, 0, 0)
 snake_body = (237, 145, 33)
 snake_head = (255, 215, 0)
-discount_factor = 0.5
+discount_factor = 0.95
 play_iter = 100000
 
 # 游戏类
@@ -149,7 +149,7 @@ class DQN_TP(nn.Module):
         :param out_dim: action_choose (up 1,down 2,left 3,right 4)
         """
         super(DQN_TP, self).__init__()
-        self.hidden_dim = 100
+        self.hidden_dim = 5
         self.action_choose = out_dim
         self.relu = nn.ReLU()
         self.get_norm = nn.Softmax()
