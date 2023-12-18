@@ -33,7 +33,7 @@ WHITE = (255, 255, 255)
 food_color = (255, 0, 0)
 snake_body = (237, 145, 33)
 snake_head = (255, 215, 0)
-discount_factor = 0.5
+discount_factor = 0.9
 play_iter = 100000
 
 # 游戏类
@@ -131,38 +131,57 @@ class SnakeGame:
         self.clock.tick(self.fps)
 
         if self.check_collision(): # 吃到自己或者碰到墙
-            reward -= 0.5
+            reward -= 3
             return [False , reward]
         elif new_lens > old_lens: # 如果吃到果实
-            reward += 2
+            reward += 5
             return [True , reward]
         else: # 啥也没发生，仅仅是移动，需要考虑其余食物的距离来计算间接奖励
             old_dis = self.compute_direction(old_head,self.food)
             new_dis = self.compute_direction(new_head,self.food)
-            reward += (old_dis - new_dis) / 100
+            reward += (old_dis - new_dis) / 10
             return [True , reward]
 
 
     def get_snake_state(self):
-        state_t = []
-        state_t.append(self.food[0] - self.snake[0][0])
-        state_t.append(self.food[1] - self.snake[0][1])
-        return state_t
+        """
+        -1 表示墙
+        0 表示空地
+        1 表示蛇头
+        2 表示蛇身
+        3 表示食物
+        :return:
+        """
+        init_state = [[0] * (int(WIDTH / GRID_SIZE)) for _ in range( int(WIDTH / GRID_SIZE))]
+        for i in range(int(WIDTH / GRID_SIZE)):
+            for j in range(int(WIDTH / GRID_SIZE)):
+                if not i or not j:
+                    init_state[i][j] = -1
+                if int(WIDTH / GRID_SIZE) - 1 in [i,j]:
+                    init_state[i][j] = -1
+        for i in range(len(self.snake)):
+            if not i:
+                init_state[int(self.snake[0][0] / 20)][int(self.snake[0][1] / 20)] = 1
+            else:
+                init_state[int(self.snake[0][0] / 20)][int(self.snake[0][1] / 20)] = 2
+        init_state[int(self.food[0] / 20)][int(self.food[1] / 20)] = 3
+
+        return init_state
 
 
 class DQN_TP(nn.Module):
     def __init__(self,input_dim,out_dim):
         """
-        :param input_dim: 2
+        :param input_dim: 20*20
         :param out_dim: action_choose (up 1,down 2,left 3,right 4)
         """
         super(DQN_TP, self).__init__()
-        self.hidden_dim = 100
+        self.hidden_dim = 64
         self.action_choose = out_dim
         self.relu = nn.ReLU()
         self.get_norm = nn.Softmax()
         self.MLP_1 = nn.Linear(input_dim,self.hidden_dim)
-        self.MLP_2 = nn.Linear(self.hidden_dim,self.action_choose)
+        self.MLP_2 = nn.Linear(input_dim*self.hidden_dim,self.action_choose)
 
     def forward(self, state):
         """
@@ -170,7 +189,6 @@ class DQN_TP(nn.Module):
         :param state:give snake state to get argmax_Q* -> action
         :return: every action to Q_value
         """
-
         hidden_vc = self.MLP_1(state)
         ac_hidden_vc = self.relu(hidden_vc)
         ac_hidden_vc = torch.unsqueeze(torch.flatten(ac_hidden_vc),0)
@@ -180,8 +198,8 @@ class DQN_TP(nn.Module):
 
 if __name__ == "__main__":
 
-    RL_model = DQN_TP(2, 4).cuda()
-    optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.00001)
+    RL_model = DQN_TP(20, 4).cuda()
+    optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.00003)
     Loss_function = nn.MSELoss()
     for iter in tqdm(range(play_iter)):
         game = SnakeGame()
@@ -197,13 +215,14 @@ if __name__ == "__main__":
             action_t = int(logits_t.argmax()) + 1
             reward_t = game.step(action_t)
 
+            reward = reward_t[-1]
             if not reward_t[0]:
-                Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward_t[1] - 5]))
+                Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward_t[1] - 4]))
                 Loss_for_RL.requires_grad_(True)
                 optimizer.zero_grad()
                 Loss_for_RL.backward()
                 optimizer.step()
-                print("epoch : {}，loss : {}".format(iter,Loss_for_RL.item()))
+                print("epoch : {}，loss : {} ，reward : {}".format(iter,Loss_for_RL.item(),reward))
                 break
             else:
                 state_t_1 = torch.unsqueeze(torch.Tensor(game.get_snake_state()),0).cuda()
@@ -213,7 +232,7 @@ if __name__ == "__main__":
                 optimizer.zero_grad()
                 Loss_for_RL.backward()
                 optimizer.step()
-                print("epoch : {}，loss : {}".format(iter,Loss_for_RL.item()))
+                print("epoch : {}，loss : {} ,reward : {}".format(iter,Loss_for_RL.item(),reward))
 #
 
 
