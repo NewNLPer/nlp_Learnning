@@ -147,9 +147,7 @@ class SnakeGame:
         else: # 啥也没发生，仅仅是移动，需要考虑其余食物的距离来计算间接奖励
             old_dis = self.compute_direction(old_head,self.food)
             new_dis = self.compute_direction(new_head,self.food)
-            print("old",old_dis)
-            print("new ",new_dis)
-            reward += (old_dis - new_dis) / 200
+            reward += ( old_dis - new_dis) / 100
             return [True , reward]
 
     def get_sort_dic(self,logits):
@@ -196,7 +194,7 @@ class DQN_TP(nn.Module):
         :param out_dim: action_choose (up 1,down 2,left 3,right 4)
         """
         super(DQN_TP, self).__init__()
-        self.hidden_dim = 128
+        self.hidden_dim = 64
         self.action_choose = out_dim
         self.relu = nn.ReLU()
         self.get_norm = nn.Softmax()
@@ -219,7 +217,7 @@ class DQN_TP(nn.Module):
 if __name__ == "__main__":
 
     RL_model = DQN_TP(20, 4).cuda()
-    optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.0000001)
+    optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.00001)
     Loss_function = nn.MSELoss()
     for iter in tqdm(range(play_iter)):
         game = SnakeGame()
@@ -230,7 +228,6 @@ if __name__ == "__main__":
                     sys.exit()
 
             state_t,direction = game.get_snake_state()
-            print("方向",direction)
             state_t = torch.unsqueeze(torch.Tensor(state_t),0).cuda()
             logits_t = RL_model(state_t)
             # q_t_for_a_t = float(logits_t.max())
