@@ -19,8 +19,12 @@ def Cooperation_proportion_derivatives(x, t, punish, b, xi):
     :param xi:Growth rate control
     :return:
     """
-    piC = x[0] + (x[1] * punish) * (1 - x[0])
-    piD = (b - x[1] * punish) * x[0]
+    # piC = x[0] + (x[1] * punish) * (1 - x[0])
+    # piD = (b - x[1] * punish) * x[0]
+
+    piC = (1 - x[1]) * x[0] + x[1] * punish * (1 - x[0])
+    piD = ((1 - x[1]) * b - x[1] * punish) * x[0]
+
 
     function_1 = x[0] * (1 - x[0]) * (piC - piD)
     function_2 = xi * x[1] * (1 - x[1]) * (piD - piC)
@@ -84,10 +88,10 @@ def get_round(list):
     return [round(item,3) for item in list]
 
 if __name__=="__main__":
-    initial_x = [0.1, 0.01]
+    initial_x = [0.5, 0.8]
     t = np.linspace(0, 200000, 200000)
     punish = 1
-    xi = 0.01
+    xi = 0.1
 
 
     # # 1. 固定背叛诱惑b的时间演化图
