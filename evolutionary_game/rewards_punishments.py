@@ -28,11 +28,11 @@ def Cooperation_proportion_derivatives(x, t, punish, b, xi):
 
 
     function_1 = x[0] * (1 - x[0]) * (piC - piD)
-    # function_2 = xi * x[1] * (1 - x[1]) * (piD - piC) # 考虑收益
-    function_3 = xi * x[1] * (1 - x[1]) * (1-2 * x[0]) # 考虑群体中合作者与背叛者
+    function_2 = xi * x[1] * (1 - x[1]) * ((1 - x[0]) * piD - x[0] * piC) # 考虑收益
+    # function_3 = xi * x[1] * (1 - x[1]) * (1-2 * x[0]) # 考虑群体中合作者与背叛者
 
 
-    return [function_1, function_3]
+    return [function_1, function_2]
 
 
 def plot_Time_evolution_chart(x,t):
