@@ -12,23 +12,24 @@ from tqdm import tqdm
 
 def Cooperation_proportion_derivatives(x, t, punish, b, xi):
     """
-    :param x:  Initial variable[x,pr]
+    :param x:  Initial variable[x,rp]
     :param t: time
     :param punish:
     :param b: b=[1,2]
     :param xi:Growth rate control
     :return:
     """
+
     ### D + rp * P
     # piC = x[0] + (x[1] * punish) * (1 - x[0])
     # piD = (b - x[1] * punish) * x[0]
     ### D - rp * D + rp*P
-    piC = (1 - x[1]) * x[0] + x[1] * punish * (1 - x[0])
-    piD = ((1 - x[1]) * b - x[1] * punish) * x[0]
-
+    piC = (1 - x[1]) * x[0] + x[2] * punish * (1 - x[0])
+    piD = ((1 - x[1]) * b - x[2] * punish) * x[0]
 
     function_1 = x[0] * (1 - x[0]) * (piC - piD)
-    function_2 = xi * x[1] * (1 - x[1]) * ((1 - x[0]) * piD - x[0] * piC) # 考虑收益
+    function_2 = xi * x[1] * (1 - x[1]) * (piD - piC) # 考虑收益
+
     # function_3 = xi * x[1] * (1 - x[1]) * (1-2 * x[0]) # 考虑群体中合作者与背叛者
 
 
@@ -91,10 +92,10 @@ def get_round(list):
     return [round(item,3) for item in list]
 
 if __name__=="__main__":
-    initial_x = [0.5, 0.5]
-    t = np.linspace(0, 200000, 200000)
+    initial_x = [0.5, 0.1]
+    t = np.linspace(0, 20000, 20000)
     punish = 1
-    xi = 0.1
+    xi = 0.01
 
 
     # # 1. 固定背叛诱惑b的时间演化图
