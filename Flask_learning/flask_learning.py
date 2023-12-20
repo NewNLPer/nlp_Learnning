@@ -5,11 +5,18 @@
 coding with comment！！！
 """
 from flask import Flask
-flask_learning = Flask(__name__)
 
-@flask_learning.route('/')
-def hello_world():
-    return 'Hello, World!'
+app = Flask(__name__)
 
-if __name__ == "__main__":
-    flask_learning.run()
+# 定义路由
+@app.route('/')
+def home():
+    return 'Hello, this is the home page!'
+
+@app.route('/about')
+def about():
+    return 'This is the about page.'
+
+# 运行应用
+if __name__ == '__main__':
+    app.run()
