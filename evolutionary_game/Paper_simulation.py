@@ -18,7 +18,6 @@ from tqdm import tqdm
 
 
 
-
 def Cooperation_proportion_derivatives(x, t, yib, sit):
     """
     :param x:  Initial variable[x,n]
