@@ -82,11 +82,11 @@ def get_round(list):
 
 if __name__=="__main__":
 
-    initial_x = [0.5, 0.1]
+    initial_x = [0.8, 0.1]
     yib = 0.1
     sit = 2
 
-    t = list(range(1,501))
+    t = np.linspace(0, 50, 1000)
 
     result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(yib,sit))
     plot_Time_evolution_chart(result,t)
