@@ -10,7 +10,7 @@ import numpy as np
 from scipy.integrate import odeint
 from tqdm import tqdm
 
-def Cooperation_proportion_derivatives(x, t, punish, b, sit):
+def Cooperation_proportion_derivatives(x, t, punish, b, sit,r):
     """
     :param x:  Initial variable[x,rp]
     :param t: time
@@ -20,9 +20,13 @@ def Cooperation_proportion_derivatives(x, t, punish, b, sit):
     :return:
     """
 
-    piC = (1 - x[1]) * x[0] + (x[1] * punish ) * (1 - x[0])
+    piC = (1 - x[1]) * x[0] + x[1] * (punish - 1) * (1 - x[0])
 
-    piD = ((1 - x[1]) * b - x[1] * punish) * x[0]
+    piD = (b - x[1]*(1 + punish)) * x[0] - x[1] * (1 - x[0])
+
+    # piC = (1 - r) * x[0] + (x[1] * punish - r) * (1 - x[0])
+    #
+    # piD = (b - r - x[1] * punish) * x[0] - r * (1 - x[0])
 
     function_1 = x[0] * (1 - x[0]) * (piC - piD)
 
@@ -92,6 +96,7 @@ if __name__=="__main__":
     t = list(range(1,1001))
     punish = 1
     sit = 2
+    r = 0.5
 
 
     # 1. 固定背叛诱惑b的时间演化图
@@ -105,7 +110,7 @@ if __name__=="__main__":
     result_finally=[]
     line_space_b=linespace(1,2,0.001)
     for b in tqdm(line_space_b):
-        result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(punish, b, sit))
+        result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(punish, b, sit,r))
         result_finally.append(get_round(result[-1].tolist()))
     plot_variogram(result_finally, line_space_b)
 
