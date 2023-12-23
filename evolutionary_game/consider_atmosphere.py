@@ -59,13 +59,13 @@ def plot_variogram(x,b):
     Degree_of_rewards_and_punishments = [sublist[1] for sublist in x]
 
     plt.plot(b,Collaborator_ratio)
-    plt.xlabel('b')
+    plt.xlabel('alph')
     plt.ylabel('pc')
     plt.title("Collaborator_ratio")
     plt.show()
 
     plt.plot(b,Degree_of_rewards_and_punishments)
-    plt.xlabel('b')
+    plt.xlabel('alph')
     plt.ylabel('degree')
     plt.title("Degree_of_rewards_and_punishments")
     plt.show()
@@ -88,11 +88,11 @@ def get_round(list):
     return [round(item,3) for item in list]
 
 if __name__=="__main__":
-    initial_x = [0.5, 0.1]
+    initial_x = [0.5, 0.8]
     t = list(range(1,1001))
-    alph = 0.3
-    bit = 0.6
-    sit = 0.1
+    alph = 0.5
+    bit = 0.8
+    sit = 0.4
 
     # 1. 固定背叛诱惑b的时间演化图
     # b = 2
