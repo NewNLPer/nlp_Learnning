@@ -10,7 +10,7 @@ import numpy as np
 from scipy.integrate import odeint
 from tqdm import tqdm
 
-def Cooperation_proportion_derivatives(x, t, punish, b, sit,r):
+def Cooperation_proportion_derivatives(x, t, punish, b, sit):
     """
     :param x:  Initial variable[x,rp]
     :param t: time
@@ -110,7 +110,7 @@ if __name__=="__main__":
     result_finally=[]
     line_space_b=linespace(1,2,0.001)
     for b in tqdm(line_space_b):
-        result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(punish, b, sit,r))
+        result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(punish, b, sit))
         result_finally.append(get_round(result[-1].tolist()))
     plot_variogram(result_finally, line_space_b)
 
