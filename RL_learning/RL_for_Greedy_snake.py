@@ -25,15 +25,13 @@ pygame.init()
 WIDTH, HEIGHT = 400, 400
 GRID_SIZE = 20
 FPS = 20
-direction_selection = {1:(0,1),2:(0,-1),3:(1,0),4:(-1,0)}
+direction_selection = {1:(-1,0),2:(1,0),3:(0,-1),4:(0,1)}
 WHITE = (255, 255, 255)
 food_color = (255, 0, 0)
 snake_body = (237, 145, 33)
 snake_head = (255, 215, 0)
 discount_factor = 0.9
 play_iter = 100000
-
-
 
 
 class Experience_pool():
@@ -109,8 +107,8 @@ class SnakeGame:
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("贪吃蛇游戏")
         self.snake = [(100, 100), (80, 100), (80, 100)]
-        nums = random.randint(1,4)
-        self.direction = direction_selection[nums]  # 初始方向向右
+        num = random.randint(2,4)
+        self.direction = direction_selection[num]  # 初始方向向右
         self.food = self.generate_food()
 
     def generate_food(self):
@@ -145,14 +143,14 @@ class SnakeGame:
         return False
 
     def move_snake(self, action):
-        if action == 1 and self.direction != (0, 1):  # 下
-            self.direction = (0, -1)
-        elif action == 2 and self.direction != (0, -1):  # 上
-            self.direction = (0, 1)
-        elif action == 3 and self.direction != (1, 0):  # 左
+        if action == 1 and self.direction != (1, 0):  # 上
             self.direction = (-1, 0)
-        elif action == 4 and self.direction != (-1, 0):  # 右
+        elif action == 2 and self.direction != (-1, 0):  # 下
             self.direction = (1, 0)
+        elif action == 3 and self.direction != (0, 1):  # 左
+            self.direction = (0, -1)
+        elif action == 4 and self.direction != (0, -1):  # 右
+            self.direction = (0, 1)
         else:
             print("Test .... 出现错误方向，当前方向{}，action_choose{}".format(self.direction,action))
             exit()
@@ -192,13 +190,14 @@ class SnakeGame:
             reward -= 2
             return [False , reward]
         elif new_lens > old_lens: # 如果吃到果实
-            reward += 3
+            reward += 2
             return [True , reward]
         else: # 啥也没发生，仅仅是移动，需要考虑其余食物的距离来计算间接奖励
             old_dis = self.compute_direction(old_head,self.food)
             new_dis = self.compute_direction(new_head,self.food)
             reward += ( old_dis - new_dis) / 100
             return [True , reward]
+
 
     def get_sort_dic(self,logits):
         candidate_action = {}
@@ -210,28 +209,23 @@ class SnakeGame:
         return sorted_dict
 
 
-    def get_know_obstacle(self,matrix,snake_head,direction):
-
-        direction_state = {(0, 1):0, (0, -1):0, (1, 0):0, (-1, 0):0}
-        Opposite_direction = (0 - direction[0], 0 - direction[1])
-        direction_state[Opposite_direction]+=1
+    def get_know_obstacle(self,matrix,snake_head):
+        direction_state = {(-1, 0):0, (1, 0):0, (0, -1):0, (0, 1):0}
         for item in direction_state:
-            if direction_state[item] == 1:
-                continue
-            else:
-                direction_test_x = snake_head[0] + item[0]
-                direction_test_y = snake_head[1] + item[1]
-                try:
-                    nums = matrix[direction_test_x][direction_test_y]
-                except:
-                    nums = 1
+            direction_test_x = snake_head[0] + item[0]
+            direction_test_y = snake_head[1] + item[1]
+            try:
+                nums = matrix[direction_test_x][direction_test_y]
+            except:
+                nums = 1
 
-                if nums in [0,3]:
-                    nums = 0
-                else:
-                    nums = 1
-                direction_state[item] = nums
-        return list(direction_state.keys())
+            if nums in [0,3]:
+                nums = 0
+            else:
+                nums = 1
+
+            direction_state[item] = nums
+        return list(direction_state.values())
 
 
     def get_snake_state(self):
@@ -257,30 +251,27 @@ class SnakeGame:
             else:
                 init_state[int(self.snake[i][0] / 20)][int(self.snake[i][1] / 20)] = 2
         init_state[int(self.food[0] / 20)][int(self.food[1] / 20)] = 3
-
         state_content = [self.food[0] - self.snake[0][0],self.food[1] - self.snake[0][1]]
-        process_out_snake_head = (int(self.snake[i][0] / 20),int(self.snake[i][1] / 20))
-        now_snake_direction = self.direction
+        process_out_snake_head = (int(self.snake[0][0] / 20),int(self.snake[0][1] / 20))
+        state_content += self.get_know_obstacle(init_state,process_out_snake_head)
 
-        state_content += self.get_know_obstacle(init_state,process_out_snake_head,now_snake_direction)
-
-        return state_content
-
+        return state_content,self.direction,init_state
 
 
 
 class DQN_TP(nn.Module):
     def __init__(self,input_dim,out_dim):
         """
-        :param input_dim: 20*20
+        :param input_dim: 1*7
         :param out_dim: action_choose (up 1,down 2,left 3,right 4)
         """
         super(DQN_TP, self).__init__()
-        self.hidden_dim = 128
+        self.hidden_dim = 64
         self.action_choose = out_dim
-        self.relu = nn.ReLU()
         self.MLP_1 = nn.Linear(input_dim,self.hidden_dim)
-        self.MLP_2 = nn.Linear(input_dim * self.hidden_dim,self.action_choose)
+        self.MLP_2 = nn.Linear(self.hidden_dim,self.action_choose)
+        self.relu = nn.ReLU()
+        self.st = nn.Softmax()
 
     def forward(self, state):
         """
@@ -291,31 +282,71 @@ class DQN_TP(nn.Module):
         hidden_vc = self.MLP_1(state)
         ac_hidden_vc = self.relu(hidden_vc)
         ac_hidden_vc = torch.unsqueeze(torch.flatten(ac_hidden_vc),0)
-        logits = self.MLP_2(ac_hidden_vc)
+        logits = self.st(self.MLP_2(ac_hidden_vc))
+
         return logits
 
-"==========================================================================="
-class DQN(nn.Module):
-    def __init__(self, state_dim, action_dim):
-        super(DQN, self).__init__()
-        self.fc1 = nn.Linear(state_dim, 64)
-        self.fc2 = nn.Linear(64, 64)
-        self.fc3 = nn.Linear(64, action_dim)
-
-    def forward(self, x):
-        x = torch.relu(self.fc1(x))
-        x = torch.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
+# class DQN(nn.Module):
+#     def __init__(self, state_dim, action_dim):
+#         super(DQN, self).__init__()
+#         self.fc1 = nn.Linear(state_dim, 64)
+#         self.fc2 = nn.Linear(64, 64)
+#         self.fc3 = nn.Linear(64, action_dim)
+#
+#     def forward(self, x):
+#         x = torch.relu(self.fc1(x))
+#         x = torch.relu(self.fc2(x))
+#         x = self.fc3(x)
+#         return x
 
 
 
 
 if __name__ == "__main__":
-
+    """
+    1. 模型控制agent进行与环境进行交互
+    2. 将交互的信息存储到经验池
+    3. 随机采样经验池的信息进行训练更新模型参数
+    """
     RL_model = DQN_TP(20, 4).cuda()
     optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.01)
     Loss_function = nn.MSELoss()
+
+    for iter in tqdm(range(play_iter)):
+        game = SnakeGame()
+        with torch.no_grad():
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            state_t, direction ,s= game.get_snake_state()
+            print(state_t)
+            print(direction)
+            print('+++++++++++++++++++++')
+            for item in s:
+                print(item)
+                print()
+            exit()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     for iter in tqdm(range(play_iter)):
         game = SnakeGame()
         while True:
