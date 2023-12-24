@@ -17,9 +17,87 @@ import time
 from tqdm import tqdm
 import sys
 import math
+import torch.utils.data as Data
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print('You are using: ' + str(device) + '...')
+class Experience_pool():
+    """
+    定义回收经验池，存储为（s(t),a(t),r(t),s(t+1)）
+    s(t): t时刻的状态
+    a(t): t时刻采取的行动
+    r(t): t时刻状态下采取某个行动获取的奖励
+    s(t+1): t时刻采取某个行动后发生改变的状态
+    """
+    def __init__(self,Storage_length):
+        self.Storage_length = Storage_length
+        self.Content = []
+    def add_element(self,element):
+        if len(self.Content) < self.Storage_length:
+            self.Content.append(element)
+        else:
+            self.Content.pop(0)
+            self.Content.append(element)
+    def Randomize_Samples(self,batch_size):
+        numbers = list(range(len(self.Content)))
+        random.shuffle(numbers)
+        sampled_numbers = numbers[:batch_size]
+        need_sample = []
+        for item in sampled_numbers:
+            need_sample.append(self.Content[item])
+        return need_sample
+
+
+class Mydata(Data.Dataset):
+    def __init__(self,data1):
+        self.data1=data1
+        self.len=len(self.data1)
+
+    def __len__(self):
+        return self.len
+    def __getitem__(self, item):
+        return self.data1[item]
+
+
+s=[(1,2),(2,3),(3,4)]
+my_data = Mydata(s)
+train_data=Mydata(s)
+
+
+def my_collate(batch):
+    data = [item[0] for item in batch]
+    label = [item[1] for item in batch]
+    res=0
+    for item in data:
+        res=max(res,len(item))
+    mask=[0]*len(data)
+    for i in range(len(data)):
+        mask[i]=[True]*len(data[i])+[False]*(res-len(data[i]))
+        data[i]=data[i]+[0]*(res-len(data[i]))
+        label[i]=label[i]+[0]*(res-len(label[i]))
+    return torch.tensor(data),label,torch.tensor(mask)
+
+
+train_loader=Data.DataLoader(
+    dataset=train_data,
+    shuffle=True,
+    batch_size=128,
+    collate_fn=my_collate
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 初始化
 pygame.init()
 
