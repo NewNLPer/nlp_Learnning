@@ -19,6 +19,23 @@ import sys
 import math
 import torch.utils.data as Data
 
+
+### 初始参数设置
+pygame.init()
+WIDTH, HEIGHT = 400, 400
+GRID_SIZE = 20
+FPS = 20
+direction_selection = {1:(0,1),2:(0,-1),3:(1,0),4:(-1,0)}
+WHITE = (255, 255, 255)
+food_color = (255, 0, 0)
+snake_body = (237, 145, 33)
+snake_head = (255, 215, 0)
+discount_factor = 0.9
+play_iter = 100000
+
+
+
+
 class Experience_pool():
     """
     定义回收经验池，存储为（s(t),a(t),r(t),s(t+1)）
@@ -46,6 +63,7 @@ class Experience_pool():
         return need_sample
 
 
+
 class Mydata(Data.Dataset):
     def __init__(self,data1):
         self.data1=data1
@@ -56,11 +74,9 @@ class Mydata(Data.Dataset):
     def __getitem__(self, item):
         return self.data1[item]
 
-
 s=[(1,2),(2,3),(3,4)]
 my_data = Mydata(s)
 train_data=Mydata(s)
-
 
 def my_collate(batch):
     data = [item[0] for item in batch]
@@ -75,7 +91,6 @@ def my_collate(batch):
         label[i]=label[i]+[0]*(res-len(label[i]))
     return torch.tensor(data),label,torch.tensor(mask)
 
-
 train_loader=Data.DataLoader(
     dataset=train_data,
     shuffle=True,
@@ -83,40 +98,6 @@ train_loader=Data.DataLoader(
     collate_fn=my_collate
 )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# 初始化
-pygame.init()
-
-# 游戏参数
-WIDTH, HEIGHT = 400, 400
-GRID_SIZE = 20
-FPS = 20
-ban_dic={1:(0,1),2:(0,-1),3:(1,0),4:(-1,0)}
-
-
-# 颜色定义
-WHITE = (255, 255, 255)
-food_color = (255, 0, 0)
-snake_body = (237, 145, 33)
-snake_head = (255, 215, 0)
-discount_factor = 0.78
-play_iter = 100000
-
-# 游戏类
 class SnakeGame:
     def __init__(self):
         pygame.init()
@@ -129,9 +110,8 @@ class SnakeGame:
         pygame.display.set_caption("贪吃蛇游戏")
         self.snake = [(100, 100), (80, 100), (80, 100)]
         nums = random.randint(1,4)
-        self.direction = ban_dic[nums]  # 初始方向向右
+        self.direction = direction_selection[nums]  # 初始方向向右
         self.food = self.generate_food()
-
 
     def generate_food(self):
         while True:
@@ -152,8 +132,6 @@ class SnakeGame:
                 pygame.draw.rect(self.screen, snake_head, (self.snake[i][0], self.snake[i][1], self.grid_size, self.grid_size))
             else:
                 pygame.draw.rect(self.screen, snake_body,(self.snake[i][0], self.snake[i][1], self.grid_size, self.grid_size))
-        # for segment in self.snake:
-        #     pygame.draw.rect(self.screen, GREEN, (segment[0], segment[1], self.grid_size, self.grid_size))
 
     def draw_food(self):
         pygame.draw.rect(self.screen, food_color, (self.food[0], self.food[1], self.grid_size, self.grid_size))
@@ -176,10 +154,7 @@ class SnakeGame:
         elif action == 4 and self.direction != (-1, 0):  # 右
             self.direction = (1, 0)
         else:
-            print("=============== 出现错误方向 ==================")
-            print(self.direction)
-            print(action)
-            print("=====================================")
+            print("Test .... 出现错误方向，当前方向{}，action_choose{}".format(self.direction,action))
             exit()
         new_head = (self.snake[0][0] + self.direction[0] * self.grid_size,
                     self.snake[0][1] + self.direction[1] * self.grid_size)
@@ -190,7 +165,6 @@ class SnakeGame:
             self.food = self.generate_food()
         else:
             self.snake.pop()
-
 
     def compute_direction(self,point1,point2):
         x1, y1 = point1
@@ -236,6 +210,29 @@ class SnakeGame:
         return sorted_dict
 
 
+    def get_know_obstacle(self,matrix,snake_head,direction):
+
+        direction_state = {(0, 1):0, (0, -1):0, (1, 0):0, (-1, 0):0}
+        Opposite_direction = (0 - direction[0], 0 - direction[1])
+        direction_state[Opposite_direction]+=1
+        for item in direction_state:
+            if direction_state[item] == 1:
+                continue
+            else:
+                direction_test_x = snake_head[0] + item[0]
+                direction_test_y = snake_head[1] + item[1]
+                try:
+                    nums = matrix[direction_test_x][direction_test_y]
+                except:
+                    nums = 1
+
+                if nums in [0,3]:
+                    nums = 0
+                else:
+                    nums = 1
+                direction_state[item] = nums
+        return list(direction_state.keys())
+
 
     def get_snake_state(self):
         """
@@ -244,6 +241,7 @@ class SnakeGame:
         1 表示蛇头
         2 表示蛇身
         3 表示食物
+        s(t) -> 横纵坐标相对于蛇头的位置，蛇头的上下左右方向是否存在障碍物。
         :return:
         """
         init_state = [[0] * (int(WIDTH / GRID_SIZE)) for _ in range( int(WIDTH / GRID_SIZE))]
@@ -259,7 +257,15 @@ class SnakeGame:
             else:
                 init_state[int(self.snake[i][0] / 20)][int(self.snake[i][1] / 20)] = 2
         init_state[int(self.food[0] / 20)][int(self.food[1] / 20)] = 3
-        return init_state,self.direction
+
+        state_content = [self.food[0] - self.snake[0][0],self.food[1] - self.snake[0][1]]
+        process_out_snake_head = (int(self.snake[i][0] / 20),int(self.snake[i][1] / 20))
+        now_snake_direction = self.direction
+
+        state_content += self.get_know_obstacle(init_state,process_out_snake_head,now_snake_direction)
+
+        return state_content
+
 
 
 
@@ -326,7 +332,7 @@ if __name__ == "__main__":
             # q_t_for_a_t = float(logits_t.max())
             condidate_action = game.get_sort_dic(logits_t)
             for key in condidate_action:
-                if ban_dic[key] != direction:
+                if direction_selection[key] != direction:
                     q_t_for_a_t = condidate_action[key]
                     reward_t = game.step(key)
                     break
