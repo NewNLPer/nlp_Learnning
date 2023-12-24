@@ -59,7 +59,8 @@ class Experience_pool():
         for item in sampled_numbers:
             need_sample.append(self.Content[item])
         return need_sample
-
+    def __len__(self):
+        return len(self.Content)
     def is_full(self):
         if len(self.Content) == self.Storage_length:
             return True
@@ -76,29 +77,6 @@ class Mydata(Data.Dataset):
     def __getitem__(self, item):
         return self.data1[item]
 
-s=[(1,2),(2,3),(3,4)]
-my_data = Mydata(s)
-train_data=Mydata(s)
-
-def my_collate(batch):
-    data = [item[0] for item in batch]
-    label = [item[1] for item in batch]
-    res=0
-    for item in data:
-        res=max(res,len(item))
-    mask=[0]*len(data)
-    for i in range(len(data)):
-        mask[i]=[True]*len(data[i])+[False]*(res-len(data[i]))
-        data[i]=data[i]+[0]*(res-len(data[i]))
-        label[i]=label[i]+[0]*(res-len(label[i]))
-    return torch.tensor(data),label,torch.tensor(mask)
-
-train_loader=Data.DataLoader(
-    dataset=train_data,
-    shuffle=True,
-    batch_size=128,
-    collate_fn=my_collate
-)
 
 class SnakeGame:
     def __init__(self):
@@ -286,7 +264,6 @@ class DQN_TP(nn.Module):
         """
         hidden_vc = self.MLP_1(state)
         ac_hidden_vc = self.relu(hidden_vc)
-        ac_hidden_vc = torch.unsqueeze(torch.flatten(ac_hidden_vc),0)
         logits = self.st(self.MLP_2(ac_hidden_vc))
 
         return logits
@@ -305,7 +282,6 @@ class DQN_TP(nn.Module):
 #         return x
 
 
-
 def get_choose_action(marix,snake_head):
     action_choose = [(-1,0),(1,0),(0,-1),(0,1)]
     action = []
@@ -320,8 +296,16 @@ def get_choose_action(marix,snake_head):
             continue
         else:
             action.append(i+1)
-
     return action
+
+
+def my_collate(batch):
+    q_t = [item[-1] for item in batch]
+    reward = [item[2] for item in batch]
+    s_t_1 = [item[3] for item in batch]
+
+
+    return q_t, reward, s_t_1
 
 
 if __name__ == "__main__":
@@ -331,112 +315,72 @@ if __name__ == "__main__":
     3. 随机采样经验池的信息进行训练更新模型参数
     """
     RL_model = DQN_TP(6, 4).cuda()
-    train_data = Experience_pool(64)
-    optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.01)
+    train_data = Experience_pool(100)
+    optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.0001)
     Loss_function = nn.MSELoss()
+    # start_train = 0
 
-    for iter in tqdm(range(play_iter)):
+    for iter_ in tqdm(range(play_iter)):
         game = SnakeGame()
         with torch.no_grad():
-            while True:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        sys.exit()
+            for ac in tqdm(range(10),desc=" Agent与环境交互收集数据 ... "):
+                game = SnakeGame()
+                while True:
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            pygame.quit()
+                            sys.exit()
 
-                state_t, pos_t ,snake_head_t= game.get_snake_state()
-                state_t_cuda = torch.unsqueeze(torch.Tensor(state_t), 0).cuda()
-                logits_t = RL_model(state_t_cuda)
-                condidate_action = game.get_sort_dic(logits_t)
+                    state_t, pos_t ,snake_head_t= game.get_snake_state()
+                    state_t_cuda = torch.unsqueeze(torch.Tensor(state_t), 0).cuda()
+                    logits_t = RL_model(state_t_cuda)
+                    condidate_action = game.get_sort_dic(logits_t)
 
-                Action_to_be_selected = get_choose_action(pos_t,snake_head_t)
-                for key in condidate_action:
-                    if key not in Action_to_be_selected:
-                        continue
-                    q_t_for_a_t = condidate_action[key]
-                    reward_t,head ,food= game.step(key)
-                    # print("asdasdasdsa",head)
-                    # t时刻采取完行动，发现蛇撞墙了，这样无法获取下一时刻的状态，需要手动处理。
+                    Action_to_be_selected = get_choose_action(pos_t,snake_head_t)
+                    for key in condidate_action:
+                        if key not in Action_to_be_selected:
+                            continue
+                        q_t_for_a_t = condidate_action[key]
+                        reward_t,head ,food= game.step(key)
+                        if head[0] >= 400 or head[0] < 0 or head[1] >= 400 or head[1] < 0 :
+                            state_t_1 = [food[0] - head[0],food[1] - head[1],1,1,1,1]
+                            q_t_for_a_t = -0.5
+                            break
+                        else:
+                            state_t_1, pos_t_1, snake_head_t_1 = game.get_snake_state()
+                            break
 
-                    if head[0] >= 400 or head[0] < 0 or head[1] >= 400 or head[1] < 0 :
-                        state_t_1 = [food[0] - head[0],food[1] - head[1],1,1,1,1]
+                    train_data.add_element([state_t,key,reward_t[1],state_t_1,q_t_for_a_t])
+                    # print([state_t,key,reward_t[1],state_t_1,q_t_for_a_t])
+                    if not reward_t[0]:
                         break
-                    else:
-                        state_t_1, pos_t_1, snake_head_t_1 = game.get_snake_state()
-                        break
-                train_data.add_element([state_t,key,reward_t[1],state_t_1])
 
-                # print('===========================================')
-                # print("t时刻状态",state_t)
-                # print("t时刻采取的行动",key)
-                # print("t时刻蛇头的位置",(snake_head_t[0]*20,snake_head_t[1]*20))
-                # print("t+1时刻蛇头的位置",head)
-                # print("t时刻得到的奖励",reward_t)
-                # print("t+1时刻的状态",state_t_1)
-                if not reward_t[0]:
-                    break
+        torch.set_grad_enabled(True)
+
+        data = Mydata(train_data.Randomize_Samples(64))
 
 
-
-            # print(reward_t)
-            # for item in pos_t_1:
-            #         print(item)
-            # exit()
-
-            #
-            #     print('=============================================')
-            #
-            #
-            # print(reward_t)
-            # exit()
-            # print(state_t)
-            # print(direction)
-            # print(key)
-            # print(reward_t)
-            #
-            # exit()
+        train_loader = Data.DataLoader(
+            dataset=data,
+            shuffle=True,
+            batch_size=16,
+            collate_fn=my_collate
+        )
 
 
-
-    # for iter in tqdm(range(play_iter)):
-    #     game = SnakeGame()
-    #     while True:
-    #         for event in pygame.event.get():
-    #             if event.type == pygame.QUIT:
-    #                 pygame.quit()
-    #                 sys.exit()
-    #
-    #         state_t,direction = game.get_snake_state()
-    #
-    #         state_t = torch.unsqueeze(torch.Tensor(state_t),0).cuda()
-    #
-    #         logits_t = RL_model(state_t)
-    #         # q_t_for_a_t = float(logits_t.max())
-    #         condidate_action = game.get_sort_dic(logits_t)
-    #         for key in condidate_action:
-    #             if direction_selection[key] != direction:
-    #                 q_t_for_a_t = condidate_action[key]
-    #                 reward_t = game.step(key)
-    #                 break
-    #
-    #         reward = reward_t[-1]
-    #         if not reward_t[0]:
-    #             Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward - 2]))
-    #             Loss_for_RL.requires_grad_(True)
-    #             optimizer.zero_grad()
-    #             Loss_for_RL.backward()
-    #             optimizer.step()
-    #             print("epoch : {}，loss : {} ，reward : {}".format(iter,Loss_for_RL.item(),reward))
-    #             break
-    #         else:
-    #             state_t_1 = torch.unsqueeze(torch.Tensor(game.get_snake_state()[0]),0).cuda()
-    #             max_q_t_1 = float(RL_model(state_t_1).max())
-    #             Loss_for_RL = Loss_function(torch.Tensor([q_t_for_a_t]),torch.Tensor([reward + discount_factor * max_q_t_1]))
-    #             Loss_for_RL.requires_grad_(True)
-    #             optimizer.zero_grad()
-    #             Loss_for_RL.backward()
-    #             optimizer.step()
-    #             print("epoch : {}，loss : {} ,reward : {}".format(iter,Loss_for_RL.item(),reward))
-#
+        for epoch in tqdm(range(1, 4),desc=" 开始更新网络参数 "):
+            train_loss = 0
+            for q_t, reward, s_t_1 in train_loader:
+                q_t = torch.unsqueeze(torch.Tensor(q_t),1).cuda()
+                reward = torch.unsqueeze(torch.Tensor(reward), 1).cuda()
+                s_t_1 = torch.Tensor(s_t_1).cuda()
+                logits_t_1 = RL_model(s_t_1)
+                Loss_for_RL = Loss_function(q_t, discount_factor * logits_t_1 + reward)
+                Loss_for_RL.requires_grad_(True)
+                optimizer.zero_grad()
+                Loss_for_RL.backward()
+                optimizer.step()
+                train_loss += Loss_for_RL.item()
+            print("epoch : {}，loss : {} ".format(epoch, train_loss / 4))
 
 
