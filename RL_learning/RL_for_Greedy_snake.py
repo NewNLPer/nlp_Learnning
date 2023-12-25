@@ -172,7 +172,7 @@ class SnakeGame:
         self.clock.tick(self.fps)
 
         if self.check_collision(): # 吃到自己或者碰到墙
-            reward -= 2
+            reward -= 3
             # print("吃到自己或者撞墙",self.snake[0])
             return [0 , reward],self.snake[0],self.food
         elif new_lens > old_lens: # 如果吃到果实
@@ -249,7 +249,7 @@ class DQN_TP(nn.Module):
         :param out_dim: action_choose (up 1,down 2,left 3,right 4)
         """
         super(DQN_TP, self).__init__()
-        self.hidden_dim = 64
+        self.hidden_dim = 128
         self.action_choose = out_dim
         self.MLP_1 = nn.Linear(input_dim,self.hidden_dim)
         self.MLP_2 = nn.Linear(self.hidden_dim,self.action_choose)
@@ -344,7 +344,7 @@ if __name__ == "__main__":
                         reward_t,head ,food= game.step(key)
                         if head[0] >= 400 or head[0] < 0 or head[1] >= 400 or head[1] < 0 :
                             state_t_1 = [food[0] - head[0],food[1] - head[1],1,1,1,1]
-                            q_t_for_a_t = -0.5
+                            q_t_for_a_t = -1
                             break
                         else:
                             state_t_1, pos_t_1, snake_head_t_1 = game.get_snake_state()
