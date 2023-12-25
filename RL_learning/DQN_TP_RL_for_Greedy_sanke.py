@@ -17,19 +17,24 @@ import pygame
 import sys
 import random
 import math
-
+import torch.utils.data as Data
+import torch
+import torch.nn as nn
+from tqdm import tqdm
 
 
 pygame.init()
 
-WIDTH, HEIGHT = 800, 800
+WIDTH, HEIGHT = 400, 400
 GRID_SIZE = 20
 FPS = 15
-
+discount_factor = 0.9
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (34,139,34)
 Snake_Head = (205,92,92)
+
+play_iter = 100
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("贪吃蛇")
@@ -183,21 +188,148 @@ def get_state(snake,food):
 
 
 
-# 游戏循环
-while True:
-    snake = Snake()
-    food = Food()
-    while True:
-
-        direction_label = {1:"UP",2:"DOWN",3:"LEFT",4:"RIGHT"}
-        nums = random.randint(1,1)
-        reward = step(direction_label[nums],snake,food)
-        print(reward)
-        print(get_state(snake,food))
-        print(snake.get_head())
-        if not reward[0]:
-            exit()
 
 
-        pygame.display.flip()
-        clock.tick(FPS)
+class Experience_pool():
+    """
+    定义回收经验池，存储为（s(t),a(t),r(t),s(t+1)）
+    s(t): t时刻的状态
+    a(t): t时刻采取的行动
+    r(t): t时刻状态下采取某个行动获取的奖励
+    s(t+1): t时刻采取某个行动后发生改变的状态
+    """
+    def __init__(self,Storage_length):
+        self.Storage_length = Storage_length
+        self.Content = []
+    def add_element(self,element):
+        if len(self.Content) < self.Storage_length:
+            self.Content.append(element)
+        else:
+            self.Content.pop(0)
+            self.Content.append(element)
+    def Randomize_Samples(self,batch_size):
+        numbers = list(range(len(self.Content)))
+        random.shuffle(numbers)
+        sampled_numbers = numbers[:batch_size]
+        need_sample = []
+        for item in sampled_numbers:
+            need_sample.append(self.Content[item])
+        return need_sample
+    def __len__(self):
+        return len(self.Content)
+    def is_full(self):
+        if len(self.Content) == self.Storage_length:
+            return True
+        else:
+            return False
+
+class Mydata(Data.Dataset):
+    def __init__(self,data1):
+        self.data1=data1
+        self.len=len(self.data1)
+
+    def __len__(self):
+        return self.len
+    def __getitem__(self, item):
+        return self.data1[item]
+
+
+class DQN_TP(nn.Module):
+    def __init__(self,input_dim,out_dim):
+        """
+        :param input_dim: 1*6
+        :param out_dim: action_choose (up 1,down 2,left 3,right 4)
+        """
+        super(DQN_TP, self).__init__()
+        self.hidden_dim = 128
+        self.action_choose = out_dim
+        self.MLP_1 = nn.Linear(input_dim,self.hidden_dim)
+        self.MLP_2 = nn.Linear(self.hidden_dim,self.action_choose)
+        self.relu = nn.ReLU()
+        self.st = nn.Softmax()
+
+    def forward(self, state):
+        """
+        :param self:
+        :param state:give snake state to get argmax_Q* -> action
+        :return: every action to Q_value
+        """
+        hidden_vc = self.MLP_1(state)
+        ac_hidden_vc = self.relu(hidden_vc)
+        logits = self.st(self.MLP_2(ac_hidden_vc))
+        return logits
+
+
+def get_sort_dic(logits):
+    candidate_action = {}
+    list_from_tensor = logits[0].tolist()
+    candidate = ["UP","DOWN","LEFT","RIGHT"]
+
+    for i in range(len(list_from_tensor)):
+        candidate_action[candidate[i]] = list_from_tensor[i]
+    sorted_items = sorted(candidate_action.items(), key=lambda x: x[1], reverse=True)
+    sorted_dict = dict(sorted_items)
+    return sorted_dict
+
+def my_collate(batch):
+    q_t = [item[-1] for item in batch]
+    reward = [item[1] for item in batch]
+    s_t_1 = [item[3] for item in batch]
+    return q_t, reward, s_t_1
+
+if __name__ == "__main__":
+
+    RL_model = DQN_TP(6, 4).cuda()
+    train_data = Experience_pool(600)
+    optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.0001)
+    Loss_function = nn.MSELoss()
+
+    for kim in range(play_iter):
+        for i in tqdm(range(1,21),desc=" Agent与环境交互收集状态数据中 "):
+            snake = Snake()
+            food = Food()
+            symbol = 0
+            while True:
+                state_t = get_state(snake, food)
+                state_t_cuda = torch.unsqueeze(torch.Tensor(state_t), 0).cuda()
+                logits_t = RL_model(state_t_cuda)
+                candidate = get_sort_dic(logits_t)
+                for key in candidate:
+                    symbol = 1
+                    reward = step(key, snake, food)
+                    q_t_for_a_t = candidate[key]
+                    state_t_1 = get_state(snake, food)
+                    if symbol:
+                        break
+                train_data.add_element([state_t ,reward[1] ,key,state_t_1 ,q_t_for_a_t])
+                if not reward[0]:
+                    pygame.display.flip()
+                    clock.tick(FPS)
+                    break
+
+
+        data = Mydata(train_data.Randomize_Samples(512))
+        train_loader = Data.DataLoader(
+            dataset=data,
+            shuffle=True,
+            batch_size=64,
+            collate_fn=my_collate
+        )
+        for epoch in tqdm(range(1, 10), desc=" DQN开始更新网络参数 "):
+            train_loss = 0
+            for q_t, reward, s_t_1 in train_loader:
+                q_t = torch.unsqueeze(torch.Tensor(q_t), 1).cuda()
+                reward = torch.unsqueeze(torch.Tensor(reward), 1).cuda()
+                s_t_1 = torch.Tensor(s_t_1).cuda()
+                logits_t_1 = RL_model(s_t_1)
+                Loss_for_RL = Loss_function(q_t, discount_factor * logits_t_1 + reward)
+                Loss_for_RL.requires_grad_(True)
+                optimizer.zero_grad()
+                Loss_for_RL.backward()
+                optimizer.step()
+                train_loss += Loss_for_RL.item()
+            print("epoch : {}，loss : {} ".format(epoch, train_loss / 4))
+
+
+
+

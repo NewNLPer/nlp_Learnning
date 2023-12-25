@@ -244,7 +244,7 @@ class SnakeGame:
 class DQN_TP(nn.Module):
     def __init__(self,input_dim,out_dim):
         """
-        :param input_dim: 1*7
+        :param input_dim: 1*6
         :param out_dim: action_choose (up 1,down 2,left 3,right 4)
         """
         super(DQN_TP, self).__init__()
