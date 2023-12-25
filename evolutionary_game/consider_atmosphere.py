@@ -31,7 +31,7 @@ def Cooperation_proportion_derivatives(x, t, b, alph, bit,sit):
 
     function_1 = x[0] * (1 - x[0]) * (x[1] * piC - piD)
 
-    function_2 = sit * (alph * x[0] - bit * x[1])
+    function_2 = sit * (2 - x[1]) * x[1] *  (alph * x[0] - bit * x[1])
 
     return [function_1, function_2]
 
@@ -88,11 +88,11 @@ def get_round(list):
     return [round(item,3) for item in list]
 
 if __name__=="__main__":
-    initial_x = [0.5, 0.8]
-    t = list(range(1,1001))
-    alph = 0.5
-    bit = 0.8
-    sit = 0.4
+    initial_x = [0.5, 1.4]
+    t = list(range(1,10001))
+    alph = 0.1
+    bit = 0.05
+    sit = 0.1
 
     # 1. 固定背叛诱惑b的时间演化图
     # b = 2
@@ -102,8 +102,8 @@ if __name__=="__main__":
 
 
    # 2. 背叛诱惑b变量的演化图
-    result_finally=[]
-    line_space_b=linespace(1,2,0.001)
+    result_finally = []
+    line_space_b = linespace(1,2,0.001)
     for b in tqdm(line_space_b):
         result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(b,alph,bit,sit))
         result_finally.append(get_round(result[-1].tolist()))

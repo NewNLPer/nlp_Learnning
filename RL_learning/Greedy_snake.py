@@ -96,8 +96,6 @@ def step(action):
             sys.exit()
 
 
-
-
     if action == "UP":
         snake.change_direction(UP)
     elif action == "DOWN":
