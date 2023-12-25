@@ -25,7 +25,7 @@ from tqdm import tqdm
 
 pygame.init()
 
-WIDTH, HEIGHT = 400, 400
+WIDTH, HEIGHT = 600, 600
 GRID_SIZE = 20
 FPS = 15
 discount_factor = 0.9
@@ -281,7 +281,7 @@ if __name__ == "__main__":
 
     RL_model = DQN_TP(6, 4).cuda()
     train_data = Experience_pool(600)
-    optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.0001)
+    optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.0002)
     Loss_function = nn.MSELoss()
 
     for kim in range(play_iter):
@@ -315,7 +315,7 @@ if __name__ == "__main__":
             batch_size=64,
             collate_fn=my_collate
         )
-        for epoch in tqdm(range(1, 10), desc=" DQN开始更新网络参数 "):
+        for epoch in tqdm(range(1, 6), desc=" DQN开始更新网络参数 "):
             train_loss = 0
             for q_t, reward, s_t_1 in train_loader:
                 q_t = torch.unsqueeze(torch.Tensor(q_t), 1).cuda()
