@@ -25,7 +25,7 @@ from tqdm import tqdm
 
 pygame.init()
 
-WIDTH, HEIGHT = 600, 600
+WIDTH, HEIGHT = 400, 400
 GRID_SIZE = 20
 FPS = 15
 discount_factor = 0.9
@@ -34,7 +34,7 @@ RED = (255, 0, 0)
 GREEN = (34,139,34)
 Snake_Head = (205,92,92)
 
-play_iter = 100
+play_iter = 1000
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("贪吃蛇")
@@ -129,7 +129,7 @@ def step(action,snake,food):
     if snake.get_head() == food.position: ### 吃到食物
         snake.grow()
         food.respawn()
-        reward = [True,1]
+        reward = [True,2]
     # 检查是否发生碰撞
     elif (
         snake.get_head()[0] < 0
@@ -138,13 +138,13 @@ def step(action,snake,food):
         or snake.get_head()[1] >= HEIGHT
         or snake.get_head() in snake.get_body()[1:]
     ): ### 撞到自己
-        reward = [False,-1]
+        reward = [False,-2]
         return reward
 
     else: ### 仅仅是移动
         dic_1 = compute_direction(old_snake_head,food_posi)
         dic_2 = compute_direction(new_snake_head,food_posi)
-        reward = [True, (dic_1 - dic_2) / 100]
+        reward = [True, (dic_1 - dic_2) / 50]
 
     # 渲染界面
     screen.fill(WHITE)
@@ -215,6 +215,12 @@ class Experience_pool():
         for item in sampled_numbers:
             need_sample.append(self.Content[item])
         return need_sample
+
+    def get_same_state(self,sht):
+        if sht in self.Content:
+            return True
+        return False
+
     def __len__(self):
         return len(self.Content)
     def is_full(self):
@@ -241,7 +247,7 @@ class DQN_TP(nn.Module):
         :param out_dim: action_choose (up 1,down 2,left 3,right 4)
         """
         super(DQN_TP, self).__init__()
-        self.hidden_dim = 128
+        self.hidden_dim = 64
         self.action_choose = out_dim
         self.MLP_1 = nn.Linear(input_dim,self.hidden_dim)
         self.MLP_2 = nn.Linear(self.hidden_dim,self.action_choose)
@@ -284,7 +290,7 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.0002)
     Loss_function = nn.MSELoss()
 
-    for kim in range(play_iter):
+    for kim in tqdm(range(play_iter),desc=" train_times"):
         for i in tqdm(range(1,21),desc=" Agent与环境交互收集状态数据中 "):
             snake = Snake()
             food = Food()
@@ -301,6 +307,8 @@ if __name__ == "__main__":
                     state_t_1 = get_state(snake, food)
                     if symbol:
                         break
+                # if train_data.get_same_state([state_t ,reward[1] ,key,state_t_1 ,q_t_for_a_t]):
+                #     break
                 train_data.add_element([state_t ,reward[1] ,key,state_t_1 ,q_t_for_a_t])
                 if not reward[0]:
                     pygame.display.flip()
@@ -312,10 +320,10 @@ if __name__ == "__main__":
         train_loader = Data.DataLoader(
             dataset=data,
             shuffle=True,
-            batch_size=64,
+            batch_size=16,
             collate_fn=my_collate
         )
-        for epoch in tqdm(range(1, 6), desc=" DQN开始更新网络参数 "):
+        for epoch in tqdm(range(1, 5), desc=" DQN开始更新网络参数 "):
             train_loss = 0
             for q_t, reward, s_t_1 in train_loader:
                 q_t = torch.unsqueeze(torch.Tensor(q_t), 1).cuda()
