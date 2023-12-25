@@ -24,14 +24,14 @@ import torch.utils.data as Data
 pygame.init()
 WIDTH, HEIGHT = 400, 400
 GRID_SIZE = 20
-FPS = 20
+FPS = 15
 direction_selection = {1:(1,0),2:(-1,0),3:(0,1),4:(0,-1)}
 WHITE = (255, 255, 255)
 food_color = (255, 0, 0)
 snake_body = (237, 145, 33)
 snake_head = (255, 215, 0)
 discount_factor = 0.9
-play_iter = 100
+play_iter = 1000
 
 
 class Experience_pool():
@@ -172,7 +172,7 @@ class SnakeGame:
         self.clock.tick(self.fps)
 
         if self.check_collision(): # 吃到自己或者碰到墙
-            reward -= 3
+            reward -= 1
             # print("吃到自己或者撞墙",self.snake[0])
             return [0 , reward],self.snake[0],self.food
         elif new_lens > old_lens: # 如果吃到果实
@@ -240,8 +240,6 @@ class SnakeGame:
         return state_content,init_state,process_out_snake_head
 
 
-
-
 class DQN_TP(nn.Module):
     def __init__(self,input_dim,out_dim):
         """
@@ -265,21 +263,7 @@ class DQN_TP(nn.Module):
         hidden_vc = self.MLP_1(state)
         ac_hidden_vc = self.relu(hidden_vc)
         logits = self.st(self.MLP_2(ac_hidden_vc))
-
         return logits
-
-# class DQN(nn.Module):
-#     def __init__(self, state_dim, action_dim):
-#         super(DQN, self).__init__()
-#         self.fc1 = nn.Linear(state_dim, 64)
-#         self.fc2 = nn.Linear(64, 64)
-#         self.fc3 = nn.Linear(64, action_dim)
-#
-#     def forward(self, x):
-#         x = torch.relu(self.fc1(x))
-#         x = torch.relu(self.fc2(x))
-#         x = self.fc3(x)
-#         return x
 
 
 def get_choose_action(marix,snake_head):
@@ -298,7 +282,6 @@ def get_choose_action(marix,snake_head):
             action.append(i+1)
     return action
 
-
 def my_collate(batch):
     q_t = [item[-1] for item in batch]
     reward = [item[2] for item in batch]
@@ -315,7 +298,7 @@ if __name__ == "__main__":
     3. 随机采样经验池的信息进行训练更新模型参数
     """
     RL_model = DQN_TP(6, 4).cuda()
-    train_data = Experience_pool(100)
+    train_data = Experience_pool(600)
     optimizer = torch.optim.Adam(RL_model.parameters(), lr=0.0001)
     Loss_function = nn.MSELoss()
     # start_train = 0
@@ -323,7 +306,7 @@ if __name__ == "__main__":
     for iter_ in tqdm(range(play_iter)):
         game = SnakeGame()
         with torch.no_grad():
-            for ac in tqdm(range(10),desc=" Agent与环境交互收集数据 ... "):
+            for ac in tqdm(range(30),desc=" Agent与环境交互收集数据 ... "):
                 game = SnakeGame()
                 while True:
                     for event in pygame.event.get():
@@ -337,6 +320,9 @@ if __name__ == "__main__":
                     condidate_action = game.get_sort_dic(logits_t)
 
                     Action_to_be_selected = get_choose_action(pos_t,snake_head_t)
+                    if not Action_to_be_selected:
+                        Action_to_be_selected = [1,2,3,4]
+                        random.shuffle(Action_to_be_selected)
                     for key in condidate_action:
                         if key not in Action_to_be_selected:
                             continue
@@ -344,7 +330,7 @@ if __name__ == "__main__":
                         reward_t,head ,food= game.step(key)
                         if head[0] >= 400 or head[0] < 0 or head[1] >= 400 or head[1] < 0 :
                             state_t_1 = [food[0] - head[0],food[1] - head[1],1,1,1,1]
-                            q_t_for_a_t = -1
+                            q_t_for_a_t = -2
                             break
                         else:
                             state_t_1, pos_t_1, snake_head_t_1 = game.get_snake_state()
@@ -357,13 +343,13 @@ if __name__ == "__main__":
 
         torch.set_grad_enabled(True)
 
-        data = Mydata(train_data.Randomize_Samples(64))
+        data = Mydata(train_data.Randomize_Samples(512))
 
 
         train_loader = Data.DataLoader(
             dataset=data,
             shuffle=True,
-            batch_size=16,
+            batch_size=64,
             collate_fn=my_collate
         )
 
