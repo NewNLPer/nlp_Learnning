@@ -8,12 +8,11 @@ import pygame
 import sys
 import random
 
-
 # 初始化pygame
 pygame.init()
 
 # 定义常量
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 800, 800
 GRID_SIZE = 20
 FPS = 15
 
@@ -22,7 +21,6 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (34,139,34)
 Snake_Head = (205,92,92)
-
 
 # 定义方向
 UP = (0, -1)
@@ -57,7 +55,6 @@ class Snake:
 
     def get_body(self):
         return self.body
-
 # 食物类
 class Food:
     def __init__(self):
@@ -70,6 +67,7 @@ class Food:
 
     def respawn(self):
         self.position = self.generate_position()
+
 
 # 初始化游戏
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -87,8 +85,6 @@ def draw_snake(snake):
         else:
             pygame.draw.rect(screen, GREEN, (snake.get_body()[i][0], snake.get_body()[i][1], GRID_SIZE, GRID_SIZE))
 
-    # for segment in snake.get_body():
-    #     pygame.draw.rect(screen, GREEN, (segment[0], segment[1], GRID_SIZE, GRID_SIZE))
 
 def draw_food(food):
     pygame.draw.rect(screen, RED, (food.position[0], food.position[1], GRID_SIZE, GRID_SIZE))
@@ -98,6 +94,9 @@ def step(action):
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+
+
+
 
     if action == "UP":
         snake.change_direction(UP)
@@ -109,7 +108,7 @@ def step(action):
         snake.change_direction(RIGHT)
 
     snake.move()
-
+    print(snake.get_body())
     if snake.get_head() == food.position:
         snake.grow()
         food.respawn()
@@ -133,25 +132,27 @@ def step(action):
     pygame.display.flip()
     clock.tick(FPS)
 
+
 # 游戏循环
 while True:
     # 在这里调用 step 函数，传入相应的动作，比如 step("UP")
     # 可以通过键盘事件获取用户输入，或者通过神经网络等方式决定动作
     # 这里使用 pygame 的 KEYDOWN 事件作为示例，你可以根据需要修改
+    dic_label = {1:"UP",2:"DOWN",3:"LEFT",4:"RIGHT"}
+    nums = random.randint(1,4)
+    step(dic_label[nums])
 
-    # step("DOWN")
 
-
-    for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                step("UP")
-            elif event.key == pygame.K_DOWN:
-                step("DOWN")
-            elif event.key == pygame.K_LEFT:
-                step("LEFT")
-            elif event.key == pygame.K_RIGHT:
-                step("RIGHT")
+    # for event in pygame.event.get():
+    #     if event.type == pygame.KEYDOWN:
+    #         if event.key == pygame.K_UP:
+    #             step("UP")
+    #         elif event.key == pygame.K_DOWN:
+    #             step("DOWN")
+    #         elif event.key == pygame.K_LEFT:
+    #             step("LEFT")
+    #         elif event.key == pygame.K_RIGHT:
+    #             step("RIGHT")
 
     # pygame.time.delay(10)  # 降低速度，可根据需要调整
     pygame.display.flip()

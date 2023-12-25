@@ -20,6 +20,7 @@ import math
 import torch.utils.data as Data
 
 
+
 ### 初始参数设置
 pygame.init()
 WIDTH, HEIGHT = 400, 400
