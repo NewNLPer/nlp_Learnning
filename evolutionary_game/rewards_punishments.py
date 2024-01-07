@@ -1,18 +1,28 @@
 # -*- coding: utf-8 -*-
 """
 @author: NewNLPer
+@time: 2023/12/23 12:42
+coding with comment！！！
+"""
+# -*- coding: utf-8 -*-
+"""
+@author: NewNLPer
 @time: 2023/12/11 19:07
 coding with comment！！！
 """
 
 import matplotlib.pyplot as plt
-import numpy as np
 from scipy.integrate import odeint
 from tqdm import tqdm
+import math
 
-def Cooperation_proportion_derivatives(x, t, punish, b, sit):
+
+
+
+
+def Cooperation_proportion_derivatives(x, t, b, alph, bit,sit):
     """
-    :param x:  Initial variable[x,rp]
+    :param x:  Initial variable[x,M]
     :param t: time
     :param punish:
     :param b: b=[1,2]
@@ -20,18 +30,14 @@ def Cooperation_proportion_derivatives(x, t, punish, b, sit):
     :return:
     """
 
-    piC = (1 - x[1]) * x[0] + x[1] * (punish - 1) * (1 - x[0])
 
-    piD = (b - x[1]*(1 + punish)) * x[0] - x[1] * (1 - x[0])
+    piC = x[0] * math.exp(1 - x[1])
 
-    # piC = (1 - r) * x[0] + (x[1] * punish - r) * (1 - x[0])
-    #
-    # piD = (b - r - x[1] * punish) * x[0] - r * (1 - x[0])
+    piD = b * x[0] * (math.exp(- x[1]))
 
     function_1 = x[0] * (1 - x[0]) * (piC - piD)
 
-    function_2 = x[1] * (1 - x[1]) * (sit * (1 - x[0]) - x[0]) # 考虑群体中合作者与背叛者
-
+    function_2 = sit * x[1] * (1 - x[1]) * (alph * x[0] - bit *(1 - x[0]))
 
     return [function_1, function_2]
 
@@ -70,10 +76,6 @@ def plot_variogram(x,b):
     plt.title("Degree_of_rewards_and_punishments")
     plt.show()
 
-    # plt.suptitle("Parameter settings {}".format(remark))
-    # plt.savefig(r'C:/Users/NewNLPer/Desktop/za/exp_figure/{}.png'.format(remark))
-    # plt.show()
-
 
 def linespace(start,end,interval):
 
@@ -87,32 +89,33 @@ def linespace(start,end,interval):
         save_list.append(end)
     return save_list
 
+
+
 def get_round(list):
 
     return [round(item,3) for item in list]
 
 if __name__=="__main__":
-    initial_x = [0.5, 0.1]
-    t = list(range(1,1001))
-    punish = 1
-    sit = 2
-    r = 0.5
+    initial_x = [0.5, 0.5]
+    t = list(range(1,10001))
+    alph = 0.1
+    bit = 0.1
+    sit = 0.1
 
+    # # 1. 固定背叛诱惑b的时间演化图
+    b = 1.8
 
-    # 1. 固定背叛诱惑b的时间演化图
-    # b = 2
+    result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(b,alph,bit,sit))
+    plot_Time_evolution_chart(result,t)
 
-    # result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(punish, b, sit))
-    # plot_Time_evolution_chart(result,t)
-    # print(result[-1])
 
    # 2. 背叛诱惑b变量的演化图
-    result_finally=[]
-    line_space_b=linespace(1,2,0.001)
-    for b in tqdm(line_space_b):
-        result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(punish, b, sit))
-        result_finally.append(get_round(result[-1].tolist()))
-    plot_variogram(result_finally, line_space_b)
+   #  result_finally = []
+   #  line_space_b = linespace(1,2,0.001)
+   #  for b in tqdm(line_space_b):
+   #      result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(b,alph,bit,sit))
+   #      result_finally.append(get_round(result[-1].tolist()))
+   #  plot_variogram(result_finally, line_space_b)
 
 
 
