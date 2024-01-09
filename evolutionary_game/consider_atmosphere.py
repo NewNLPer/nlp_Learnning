@@ -19,13 +19,10 @@ import random
 
 
 initial_x = [0.5, 0.5]
-t = list(range(1, 500001))
-alph = 0.1
+t = list(range(1, 15001))
+alph = 0.2
 bit = 0
 sit = 0.1
-
-
-
 
 
 def Cooperation_proportion_derivatives(x, t, b, alph, bit,sit):
@@ -43,7 +40,7 @@ def Cooperation_proportion_derivatives(x, t, b, alph, bit,sit):
 
     function_1 = x[0] * (1 - x[0]) * (piC - piD)
 
-    function_2 = sit * x[1] * (1 - x[1]) * (alph * x[0] - bit *(1 - x[0]) - 0.05 * x[1])
+    function_2 = sit * x[1] * (1 - x[1]) * (alph * x[0] - bit *(1 - x[0]) - 0.8 * x[1])
 
     return [function_1, function_2]
 
@@ -109,14 +106,14 @@ def time_evloution(b):
 def single_plot(alph,bit,state):
     if state:
         result_finally = []
-        line_space_b = linespace(1,2,0.05)
+        line_space_b = linespace(1,1.99,0.05)
         for b in tqdm(line_space_b):
             result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(b,alph,bit,sit))
             result_finally.append(get_round(result[-1].tolist()))
         plot_variogram(result_finally, line_space_b)
     else:
         result_finally = []
-        line_space_b = linespace(1, 2, 0.05)
+        line_space_b = linespace(1, 1.99, 0.05)
         for b in tqdm(line_space_b):
             result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(b, alph, bit, sit))
             result_finally.append(get_round(result[-1].tolist()))
@@ -134,17 +131,16 @@ def multivariable_plot(variable):
     :param variable:[(a1,b1),(a2,b2),(a3,b3),...]
     :return:
     """
-    color_set = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'r']
 
     polt_dic={}
 
     for item in variable:
         alph = "alph = {}".format(item[0])
-        bit = "alph = {}".format(item[1])
+        bit = "bit = {}".format(item[1])
         result = single_plot(item[0],item[1],0)
         polt_dic[alph + " * " + bit] = [result[0],[sublist[0] for sublist in result[1]],[sublist[1] for sublist in result[1]]]
 
-    color_set = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'r']
+    color_set = ['b', 'g', 'c', 'm', 'y', 'k', 'r']
     for key in polt_dic: # 绘制合作者比例随背叛诱惑的变化图
 
         nums = random.randint(0,len(color_set) - 1)
@@ -156,17 +152,16 @@ def multivariable_plot(variable):
     plt.legend()
     plt.title('Collaborator_ratio')
     plt.xlabel('b')
-    plt.ylabel('y')
+    plt.ylabel('pc')
     plt.show()
 
-    color_set = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'r']
-    for key in polt_dic: # 绘制氛围M随背叛诱惑的变化图
+    color_set = ['b', 'g', 'c', 'm', 'y', 'k', 'r']
+    for key1 in polt_dic: # 绘制氛围M随背叛诱惑的变化图
 
         nums = random.randint(0,len(color_set) - 1)
-        plt.plot(polt_dic[key][0], polt_dic[key][2], label=key, color=color_set[nums])  # 红色线条
-        plt.scatter(polt_dic[key][0], polt_dic[key][2], marker='*', color='red')
+        plt.plot(polt_dic[key1][0], polt_dic[key1][2], label=key1, color=color_set[nums])  # 红色线条
+        plt.scatter(polt_dic[key1][0], polt_dic[key1][2], marker='*', color='red')
         color_set = color_set[:nums] + color_set[nums+1:]
-
 
     plt.legend()
     plt.title('Degree_of_Atmosphere')
@@ -180,11 +175,11 @@ if __name__=="__main__":
 
 
 
-    # time_evloution(b=1.5)
+    # time_evloution(b=1.8)
 
     # print(single_plot(alph,bit))
 
-    multivariable_plot([(0.5,0.6),(0.6,0.6)])
+    multivariable_plot([(0.1,0),(0.2,0),(0.3,0),(0.4,0),(0.5,0)])
 
 
 
