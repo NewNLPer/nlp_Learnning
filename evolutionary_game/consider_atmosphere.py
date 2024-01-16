@@ -20,12 +20,14 @@ import random
 
 initial_x = [0.5, 0.5]
 t = list(range(1, 15001))
-alph = 0.2
-bit = 0
+alph = 0.5
+yit = 0.5
 sit = 0.1
+cim = 0.5
 
 
-def Cooperation_proportion_derivatives(x, t, b, alph, bit,sit):
+
+def Cooperation_proportion_derivatives(x, t, b, alph, yit,sit):
     return_ = """
     :param x:  Initial variable[x,M]
     :param t: time
@@ -34,18 +36,18 @@ def Cooperation_proportion_derivatives(x, t, b, alph, bit,sit):
     :param xi:Growth rate control
     :return:
     """
-    piC = x[0] * (1 + (1 - x[1]) * (1 - x[1]))
+    piC = x[0] * (1 + (1 - x[1]) ** cim)
 
-    piD = b * x[0] * (1 - x[1] * x[1])
+    piD = b * x[0] * (1 - x[1] ** cim)
 
     function_1 = x[0] * (1 - x[0]) * (piC - piD)
 
-    function_2 = sit * x[1] * (1 - x[1]) * (alph * x[0] - bit *(1 - x[0]) - 0.8 * x[1])
+    function_2 = sit * x[1] * (1 - x[1]) * (alph * x[0] - yit * x[1])
 
     return [function_1, function_2]
 
 
-def plot_Time_evolution_chart(x,t):
+def plot_Time_evolution_chart(x,t): # 单一变量的 时间演化图
     Collaborator_ratio = [sublist[0] for sublist in x]
     Degree_of_rewards_and_punishments = [sublist[1] for sublist in x]
 
@@ -57,12 +59,12 @@ def plot_Time_evolution_chart(x,t):
 
     plt.plot(t,Degree_of_rewards_and_punishments)
     plt.xlabel('t')
-    plt.ylabel('Atmosphere')
+    plt.ylabel('atm')
     plt.title("Degree_of_Atmosphere")
     plt.show()
 
 
-def plot_variogram(x,b):
+def plot_variogram(x,b): #单一变量的 背叛诱惑图
 
     Collaborator_ratio = [sublist[0] for sublist in x]
     Degree_of_rewards_and_punishments = [sublist[1] for sublist in x]
@@ -71,7 +73,6 @@ def plot_variogram(x,b):
     # 绘制折线图，同时指定线条颜色
     plt.plot(b, Collaborator_ratio, label='Pc', color='red')  # 红色线条
     plt.plot(b, Degree_of_rewards_and_punishments, label='M', color='green')  # 绿色线条
-
     # 添加五角星标记
     plt.scatter(b, Collaborator_ratio, marker='*', color='red')
     plt.scatter(b, Degree_of_rewards_and_punishments, marker='*', color='green')
@@ -81,11 +82,11 @@ def plot_variogram(x,b):
     plt.title('Collaborator_ratio and Degree_of_Atmosphere')
     plt.xlabel('b')
     plt.ylabel('y')
-
     # 显示图形
     plt.show()
 
-def linespace(start,end,interval):
+
+def linespace(start,end,interval): # 为防止精度溢出，定义间隔
 
     float_lens = len(str(interval).split(".")[-1])
     save_list = []
@@ -98,31 +99,37 @@ def linespace(start,end,interval):
     return save_list
 
 
-def time_evloution(b):
+def time_evloution(b):  # 单一变量的 时间演化图
 
-    result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(b,alph,bit,sit))
+    result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(b,alph,yit,sit))
     plot_Time_evolution_chart(result,t)
 
-def single_plot(alph,bit,state):
+
+def single_plot(alph,yit,state):
+    """
+    :param alph:
+    :param bit:
+    :param state: 0 画图 1 返回结果
+    :return:
+    """
     if state:
         result_finally = []
         line_space_b = linespace(1,1.99,0.05)
         for b in tqdm(line_space_b):
-            result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(b,alph,bit,sit))
+            result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(b,alph,yit,sit))
             result_finally.append(get_round(result[-1].tolist()))
         plot_variogram(result_finally, line_space_b)
     else:
         result_finally = []
         line_space_b = linespace(1, 1.99, 0.05)
         for b in tqdm(line_space_b):
-            result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(b, alph, bit, sit))
+            result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(b, alph, yit, sit))
             result_finally.append(get_round(result[-1].tolist()))
         return [line_space_b,result_finally]
 
 
 
 def get_round(list):
-
     return [round(item,3) for item in list]
 
 
@@ -136,7 +143,7 @@ def multivariable_plot(variable):
 
     for item in variable:
         alph = "alph = {}".format(item[0])
-        bit = "bit = {}".format(item[1])
+        bit = "yit = {}".format(item[1])
         result = single_plot(item[0],item[1],0)
         polt_dic[alph + " * " + bit] = [result[0],[sublist[0] for sublist in result[1]],[sublist[1] for sublist in result[1]]]
 
@@ -175,11 +182,11 @@ if __name__=="__main__":
 
 
 
-    # time_evloution(b=1.8)
+    # time_evloution(1.8)
 
     # print(single_plot(alph,bit))
 
-    multivariable_plot([(0.1,0),(0.2,0),(0.3,0),(0.4,0),(0.5,0)])
+    multivariable_plot([(0.1,0.3),(0.3,0.3),(0.5,0.3),(0.7,0.3),(0.9,0.3)])
 
 
 
