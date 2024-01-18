@@ -20,10 +20,10 @@ import random
 
 initial_x = [0.5, 0.5]
 t = list(range(1, 15001))
-alph = 0.5
+alph = 0.1
 yit = 0.5
-sit = 0.1
-cim = 0.5
+sit = 0.5
+cim = 5
 
 
 
@@ -182,11 +182,14 @@ if __name__=="__main__":
 
 
 
-    # time_evloution(1.8)
+
+
+    # time_evloution(1.5)
 
     # print(single_plot(alph,bit))
 
-    multivariable_plot([(0.1,0.3),(0.3,0.3),(0.5,0.3),(0.7,0.3),(0.9,0.3)])
+    for item in [0.1,0.4,0.7]:
+        multivariable_plot([(0.1,item),(0.3,item),(0.5,item),(0.7,item),(0.9,item)])
 
 
 
