@@ -21,9 +21,9 @@ import random
 initial_x = [0.5, 0.5]
 t = list(range(1, 15001))
 alph = 0.1
-yit = 0.5
+yit = 0.01
 sit = 0.5
-cim = 5
+cim = 1/3
 
 
 
