@@ -20,12 +20,13 @@ import random
 
 initial_x = [0.5, 0.5]
 t = list(range(1, 15001))
-alph = 0.1
-yit = 0.01
-sit = 0.5
-cim = 1/3
+alph = 0.2
+yit = 0.1
+sit = 0.1
+cim = 2
 
-
+k_1 = 0.8
+k_2 = 0.5
 
 def Cooperation_proportion_derivatives(x, t, b, alph, yit,sit):
     return_ = """
@@ -36,9 +37,9 @@ def Cooperation_proportion_derivatives(x, t, b, alph, yit,sit):
     :param xi:Growth rate control
     :return:
     """
-    piC = x[0] * (1 + (1 - x[1]) ** cim)
+    piC = x[0] * (1 + k_1 * (1 - x[1]) ** cim)
 
-    piD = b * x[0] * (1 - x[1] ** cim)
+    piD = b * x[0] * (1 - k_2 * x[1] ** cim)
 
     function_1 = x[0] * (1 - x[0]) * (piC - piD)
 
@@ -181,10 +182,7 @@ def multivariable_plot(variable):
 if __name__=="__main__":
 
 
-
-
-
-    # time_evloution(1.5)
+    # time_evloution(1.8)
 
     # print(single_plot(alph,bit))
 
