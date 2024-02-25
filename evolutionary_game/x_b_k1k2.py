@@ -42,28 +42,6 @@ def Cooperation_proportion_derivatives(x, t, b, alph, yit,sit,k_1,k_2):
 
 
 
-# def plot_variogram(x,b): #单一变量的 背叛诱惑图
-#
-#     Collaborator_ratio = [sublist[0] for sublist in x]
-#     Degree_of_rewards_and_punishments = [sublist[1] for sublist in x]
-#
-#
-#     # 绘制折线图，同时指定线条颜色
-#     plt.plot(b, Collaborator_ratio, label='Pc', color='red')  # 红色线条
-#     plt.plot(b, Degree_of_rewards_and_punishments, label='M', color='green')  # 绿色线条
-#     # 添加五角星标记
-#     plt.scatter(b, Collaborator_ratio, marker='*', color='red')
-#     plt.scatter(b, Degree_of_rewards_and_punishments, marker='*', color='green')
-#
-#     # 添加其他元素
-#     plt.legend()
-#     plt.title('Collaborator_ratio and Degree_of_Atmosphere')
-#     plt.xlabel('b')
-#     plt.ylabel('y')
-#     # 显示图形
-#     plt.show()
-
-
 def linespace(start,end,interval): # 为防止精度溢出，定义间隔
 
     float_lens = len(str(interval).split(".")[-1])
@@ -103,7 +81,6 @@ def plt_k1_k2_figure(k_1,k_2):
         line_space_b = linespace(1, 1.99, 0.05)
         for k_1 in [0,0.3,0.7,1]:
             result = single_plot(k_1,k_2)
-            print(result[-1])
             pc = [item[0] for item in result[-1]]
             plt.xlabel('b')
             plt.ylabel(r'$\rho_c$')
@@ -122,29 +99,28 @@ def plt_k1_k2_figure(k_1,k_2):
         plt.title('$k_{2}=0.5$')
         plt.show()
 
-    # if k_2 == -1: # k2 = [0,0.3,0.7,1]
-    #     line_space_b = linespace(1, 1.99, 0.05)
-    #     for k_2 in [0,0.3,0.7,1]:
-    #         result = single_plot(k_1,k_2)
-    #         print(result)
-    #         pc = [item[0] for item in result[-1]]
-    #         plt.xlabel('b')
-    #         plt.ylabel(r'$\rho_c$')
-    #         plt.plot(line_space_b, pc, label="$k_{2}=%s$" % (k_2),marker='*')
-    #     plt.legend()
-    #     plt.title('$k_{1}=0.5$')
-    #     plt.show()
-    #
-    #     for k_2 in [0,0.3,0.7,1]:
-    #         result = single_plot(k_1,k_2)
-    #         pc = [item[-1] for item in result[-1]]
-    #         plt.xlabel('b')
-    #         plt.ylabel('M')
-    #         plt.plot(line_space_b, pc, label="$k_{2}=%s$" % (k_2),marker='*')
-    #     plt.legend()
-    #     plt.title('$k_{1}=0.5$')
-    #     plt.show()
+    if k_2 == -1: # k2 = [0,0.3,0.7,1]
+        line_space_b = linespace(1, 1.99, 0.05)
+        for k_2 in [0,0.3,0.7,1]:
+            result = single_plot(k_1,k_2)
+            pc = [item[0] for item in result[-1]]
+            plt.xlabel('b')
+            plt.ylabel(r'$\rho_c$')
+            plt.plot(line_space_b, pc, label="$k_{2}=%s$" % (k_2),marker='*')
+        plt.legend()
+        plt.title('$k_{1}=0.5$')
+        plt.show()
+
+        for k_2 in [0,0.3,0.7,1]:
+            result = single_plot(k_1,k_2)
+            pc = [item[-1] for item in result[-1]]
+            plt.xlabel('b')
+            plt.ylabel('M')
+            plt.plot(line_space_b, pc, label="$k_{2}=%s$" % (k_2),marker='*')
+        plt.legend()
+        plt.title('$k_{1}=0.5$')
+        plt.show()
 
 
 if __name__=="__main__":
-    plt_k1_k2_figure(-1,1)
+    plt_k1_k2_figure(0.5,-1)
