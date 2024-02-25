@@ -24,8 +24,8 @@ t = list(range(1, 100001))
 alph = 0.1
 yit = 0.1
 sit = 0.1
-k_1 = 0
-k_2 = 1
+k_1 = 0.5
+k_2 = 0.5
 
 def Cooperation_proportion_derivatives(x, t, b, alph, yit,sit):
     return_ = """
@@ -180,12 +180,12 @@ def multivariable_plot(variable):
 if __name__=="__main__":
 
 
-    time_evloution(1.5)
+    # time_evloution(1.5)
 
     # print(single_plot(alph,bit))
 
-    # for item in [0.1,0.4,0.7]:
-    #     multivariable_plot([(0.1,item),(0.3,item),(0.5,item),(0.7,item),(0.9,item)])
+    for item in [0.1,0.4,0.7]:
+        multivariable_plot([(0.1,item),(0.3,item),(0.5,item),(0.7,item),(0.9,item)])
 
 
 
