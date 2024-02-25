@@ -18,14 +18,13 @@ import math
 import random
 
 
+
 initial_x = [0.5, 0.5]
-t = list(range(1, 15001))
-alph = 0.2
+t = list(range(1, 100001))
+alph = 0.1
 yit = 0.1
 sit = 0.1
-cim = 2
-
-k_1 = 1
+k_1 = 0
 k_2 = 1
 
 def Cooperation_proportion_derivatives(x, t, b, alph, yit,sit):
@@ -37,9 +36,9 @@ def Cooperation_proportion_derivatives(x, t, b, alph, yit,sit):
     :param xi:Growth rate control
     :return:
     """
-    piC = x[0] * (1 + k_1 * (1 - x[1]) ** cim)
+    piC = x[0] * (1 + k_1 * (1 - x[1]) ** 2)
 
-    piD = b * x[0] * (1 - k_2 * x[1] ** cim)
+    piD = b * x[0] * (1 - k_2 * x[1] ** 2)
 
     function_1 = x[0] * (1 - x[0]) * (piC - piD)
 
@@ -51,17 +50,16 @@ def Cooperation_proportion_derivatives(x, t, b, alph, yit,sit):
 def plot_Time_evolution_chart(x,t): # 单一变量的 时间演化图
     Collaborator_ratio = [sublist[0] for sublist in x]
     Degree_of_rewards_and_punishments = [sublist[1] for sublist in x]
+    plt.rc('text', usetex=False)
 
-    plt.plot(t,Collaborator_ratio)
+    plt.semilogx(t,Collaborator_ratio)
     plt.xlabel('t')
-    plt.ylabel('pc')
-    plt.title("Collaborator_ratio")
+    plt.ylabel(r'$\rho_c$')
     plt.show()
 
-    plt.plot(t,Degree_of_rewards_and_punishments)
+    plt.semilogx(t,Degree_of_rewards_and_punishments)
     plt.xlabel('t')
-    plt.ylabel('atm')
-    plt.title("Degree_of_Atmosphere")
+    plt.ylabel('M')
     plt.show()
 
 
@@ -182,7 +180,7 @@ def multivariable_plot(variable):
 if __name__=="__main__":
 
 
-    time_evloution(1.8)
+    time_evloution(1.5)
 
     # print(single_plot(alph,bit))
 
