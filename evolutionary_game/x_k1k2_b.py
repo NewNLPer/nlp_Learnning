@@ -39,9 +39,6 @@ def Cooperation_proportion_derivatives(x, t, b, alph, yit,sit,k_1,k_2):
     return [function_1, function_2]
 
 
-
-
-
 def linespace(start,end,interval): # 为防止精度溢出，定义间隔
 
     float_lens = len(str(interval).split(".")[-1])
@@ -131,60 +128,12 @@ def plt_b_ks_figure(b):
     plt.show()
 
 
-
-plt_b_ks_figure(b=1.3)
-
+plt_b_ks_figure(b=1.5)
 
 
 
 
-    # if k_1 == -1: # k_1 = [0,0.3,0.7,1]
-    #     line_space_b = linespace(1, 1.99, 0.05)
-    #     for k_1 in [0,0.3,0.7,1]:
-    #         result = single_plot(k_1,k_2)
-    #         pc = [item[0] for item in result[-1]]
-    #         plt.xlabel('b')
-    #         plt.ylabel(r'$\rho_c$')
-    #         plt.plot(line_space_b, pc, label="$k_{1}=%s$" % (k_1),marker='*')
-    #     plt.legend()
-    #     plt.title('$k_{2}=0.5$')
-    #     plt.show()
-    #
-    #     for k_1 in [0,0.3,0.7,1]:
-    #         result = single_plot(k_1,k_2)
-    #         pc = [item[1] for item in result[-1]]
-    #         plt.xlabel('b')
-    #         plt.ylabel('M')
-    #         plt.plot(line_space_b, pc, label="$k_{1}=%s$" % (k_1),marker='*')
-    #     plt.legend()
-    #     plt.title('$k_{2}=0.5$')
-    #     plt.show()
-    #
-    # if k_2 == -1: # k2 = [0,0.3,0.7,1]
-    #     line_space_b = linespace(1, 1.99, 0.05)
-    #     for k_2 in [0,0.3,0.7,1]:
-    #         result = single_plot(k_1,k_2)
-    #         pc = [item[0] for item in result[-1]]
-    #         plt.xlabel('b')
-    #         plt.ylabel(r'$\rho_c$')
-    #         plt.plot(line_space_b, pc, label="$k_{2}=%s$" % (k_2),marker='*')
-    #     plt.legend()
-    #     plt.title('$k_{1}=0.5$')
-    #     plt.show()
-    #
-    #     for k_2 in [0,0.3,0.7,1]:
-    #         result = single_plot(k_1,k_2)
-    #         pc = [item[-1] for item in result[-1]]
-    #         plt.xlabel('b')
-    #         plt.ylabel('M')
-    #         plt.plot(line_space_b, pc, label="$k_{2}=%s$" % (k_2),marker='*')
-    #     plt.legend()
-    #     plt.title('$k_{1}=0.5$')
-    #     plt.show()
-#
-#
-# if __name__=="__main__":
-#     plt_k1_k2_figure(0.5,-1)
+
 
 
 
