@@ -43,7 +43,7 @@ if __name__=="__main__":
     sit = 0.1
     k_1 = 0.5
     k_2 = 0.5
-    b = 1.6
+    b = 1.3
     k1 = np.arange(0, 1.01, 0.01)
     k2 = np.arange(0, 1.01, 0.01)
     data_pc = np.zeros((len(k1), len(k1)))
@@ -57,22 +57,27 @@ if __name__=="__main__":
             data_pc[i][j]=result[-1][0]
             data_m[i][j] = result[-1][-1]
 
-    plt.pcolormesh(k2,k1, data_pc, cmap='viridis')
+
+    # 绘制第一个热图
+    plt.pcolormesh(k2, k1, data_pc, cmap='viridis', shading='auto')
     # 添加颜色条
-    plt.colorbar()
+    colorbar_pc = plt.colorbar()
+    colorbar_pc.set_ticks([0, 0.2, 0.4, 0.6, 0.8, 1])
     # 添加标签和标题
     plt.xlabel('$k_{2}$')
     plt.ylabel('$k_{1}$')
-    plt.title("$b=%s$"%(b))
+    plt.title("$b=%s$" % (b))
     # 显示图形
     plt.show()
 
-    plt.pcolormesh(k2,k1, data_m, cmap='viridis')
+    # 绘制第二个热图
+    plt.pcolormesh(k2, k1, data_m, cmap='viridis')
     # 添加颜色条
-    plt.colorbar()
+    colorbar_m = plt.colorbar()
+    colorbar_m.set_ticks([0, 0.2, 0.4, 0.6, 0.8, 1])
     # 添加标签和标题
     plt.xlabel('$k_{2}$')
     plt.ylabel('$k_{1}$')
-    plt.title("$b=%s$"%(b))
+    plt.title("$b=%s$" % (b))
     # 显示图形
     plt.show()

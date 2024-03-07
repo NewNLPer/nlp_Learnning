@@ -128,7 +128,7 @@ def plt_b_ks_figure(b):
     plt.show()
 
 
-plt_b_ks_figure(b=1.5)
+plt_b_ks_figure(b=1)
 
 
 
