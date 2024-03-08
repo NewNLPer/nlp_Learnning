@@ -43,7 +43,7 @@ if __name__=="__main__":
     sit = 0.1
     k_1 = 0.5
     k_2 = 0.5
-    b = 1.3
+    b = 1.67
     k1 = np.arange(0, 1.01, 0.01)
     k2 = np.arange(0, 1.01, 0.01)
     data_pc = np.zeros((len(k1), len(k1)))
