@@ -160,6 +160,7 @@ def re_pailie(nums):### 有重复数组
                 bt(path,nums[:i]+nums[i+1:])
                 path.pop()
     bt([],nums)
+
     return res
 
 '''
