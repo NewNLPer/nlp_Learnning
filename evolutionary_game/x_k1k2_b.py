@@ -17,7 +17,7 @@ import random
 initial_x = [0.5, 0.5]
 t = list(range(1, 200001))
 alph = 0.1
-yit = 0.1
+yit = 0.2
 sit = 0.1
 k_1 = 1
 k_2 = 1

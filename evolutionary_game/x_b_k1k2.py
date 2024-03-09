@@ -123,4 +123,4 @@ def plt_k1_k2_figure(k_1,k_2):
 
 
 if __name__=="__main__":
-    plt_k1_k2_figure(-1,0.5)
+    plt_k1_k2_figure(0.5,-1)
