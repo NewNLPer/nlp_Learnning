@@ -164,3 +164,113 @@ def getPermutation(n: int, k: int) -> str:
 print(getPermutation(9,136371))
 
 
+
+### attention的计
+
+
+
+import torch
+import torch.nn as nn
+
+
+class Muti_Head_Attention(nn.Module):
+    def __init__(self):
+        super(Muti_Head_Attention,self).__init__()
+        self.W_Q = nn.Linear(d_model,d_k * n_head)
+        self.W_K = nn.Linear(d_model, d_k * n_head)
+        self.W_V = nn.Linear(d_model, d_k * n_head)
+
+
+    def get_atten_score(self,Q,K,V,mask):
+        scores = torch.matmul(Q, K.transpose(-1, -2)) / np.sqrt(d_k)
+        scores.masked_fill_(mask, -1e9)
+        attn = nn.Softmax(dim=-1)(scores)
+        context = torch.matmul(attn, V)
+        return context
+
+    def forward(self,x_input):
+        batch_size = x_input.size()[0]
+        Q = self.W_Q(x_input).view(batch_size,-1,n_head,d_k)
+        K = self.W_V(x_input).view(batch_size,-1,n_head,d_k)
+        V = self.W_V(x_input).view(batch_size,-1,n_head,d_k)
+        mask
+
+        context = self.get_atten_score(Q,K,V,mask)
+        return context
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
