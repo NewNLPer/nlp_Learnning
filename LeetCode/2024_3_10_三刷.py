@@ -108,9 +108,104 @@ def qiege_(s):
                 continue
     bt(0,[])
     return res
-print(qiege_("asad"))
 
 
+## 二分查找
+
+def binary(nums,target):
+    start = 0
+    end = len(nums) - 1
+    while start <= end:
+        mid = (start + end) // 2
+        if nums[mid] == target:
+            return mid
+        elif nums[start] > target:
+            end = mid - 1
+        else:
+            start = mid + 1
+    return start
+### 请注意 start 是需要插入的位置。
+
+def get_r(nums,target):
+    start = 0
+    end = len(nums) - 1
+    while start <= end:
+        mid = (start + end) // 2
+        if nums[mid] > target:
+            end = mid - 1
+        else:
+            start = mid + 1
+    if end < 0 or nums[end] != target:
+        return -1
+    return end
+
+
+def solve(nums: str) -> int:
+    if len(nums) == 1:
+        if nums[0] != "0":
+            return 1
+        else:
+            return 0
+    else:
+        dp = [0] * len(nums)  ## dp[i] 表示nums[0-i]能组成的数量
+        if nums[0] != "0":
+            dp[0] = 1
+        s = nums[0:2]
+        if len(s) == len(str(int(s))):
+            if int(s) <= 26 and int(s) not in [10, 20]:
+                dp[1] = 2
+            elif int(s) <= 26 and int(s) in [10, 20]:
+                dp[1] = 1
+            elif int(s) > 26 and s[-1] != "0":
+                dp[1] = 1
+            elif int(s) > 26 and s[-1] == "0":
+                dp[1] = 0
+        else:
+            dp[1] = 0
+
+        for i in range(2, len(nums)):
+            if nums[i] != "0":
+                dp[i] += dp[i - 1]
+
+            if len(nums[i - 1:i + 1]) == len(str(int(nums[i - 1:i + 1]))) and int(nums[i - 1:i + 1]) <= 26:
+                dp[i] += dp[i - 2]
+
+        return dp[-1]
+
+
+
+def get_Listnode_lens(head):
+    if not head:
+        return 0
+    elif not head.next:
+        return 1
+    else:
+        ans = 0
+        while head:
+            ans += 1
+            head = head.next
+        return ans
+
+
+class Node():
+    def __init__(self,val):
+        self.val = val
+        self.next = None
+
+
+a = Node(1)
+b = Node(2)
+c = Node(3)
+
+a.next = b
+b.next = c
+
+print(get_Listnode_lens(a))
+
+
+
+nums = [1,2,43]
+nums.sort(key = lambda )
 
 
 
