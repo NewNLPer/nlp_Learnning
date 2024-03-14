@@ -137,7 +137,7 @@ def get_r(nums,target):
             start_zhen = mid + 1
         else:
             start_zhen = mid + 1
-    if end_zhen < 0 and nums[end_zhen] != target:
+    if end_zhen < 0 or nums[end_zhen] != target:
         return -1
     return end_zhen
 
