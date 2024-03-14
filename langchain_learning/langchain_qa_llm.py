@@ -4,7 +4,7 @@
 @time: 2024/3/13 19:01
 coding with comment！！！
 """
-from langchain.document_loaders import Docx2txtLoader
+from langchain.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
 import logging
@@ -45,7 +45,7 @@ class ChatGLM(LLM):
         return resp['result']
 
 
-loader = Docx2txtLoader(r"C:\Users\NewNLPer\Desktop\123.docx")
+loader = TextLoader(r"C:\Users\NewNLPer\Desktop\123.docx")
 data = loader.load()
 
 # 初始化加载器
@@ -74,7 +74,7 @@ for x in similarDocs:
 
 
 retriever = db.as_retriever()
-qa = RetrievalQA.from_chain_type(llm=ChatGLM, chain_type="stuff", retriever=retriever)
+qa = RetrievalQA.from_chain_type(llm = ChatGLM, chain_type="stuff", retriever=retriever)
 
 query = "新能源行业发展了多久？"
 print(qa.run(query))

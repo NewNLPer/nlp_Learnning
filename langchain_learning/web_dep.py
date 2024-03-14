@@ -50,3 +50,6 @@ if __name__ == "__main__":
    #     print("BOT:",result["result"])
    # else:
    #     print("Error:",response.status_code, response.text)
+
+
+print(input())
