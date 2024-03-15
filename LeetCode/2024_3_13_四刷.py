@@ -138,12 +138,60 @@ def qiege(s):
 
 
 
+def get_corre(dic_1,dic_2):
+    for key in dic_1:
+        nums = dic_2.get(key,-1)
+        if nums < dic_1[key]:
+            return False
+    return True
+
+def minWindow(s: str, t: str) -> str:
+    if len(s) == len(t):
+        if s!= t:
+            return ""
+        else:
+            return s
+    elif len(s) < len(t):
+        return ""
+    else:
+        res = ["",99999]
+        dic_1 = {} # 为基准
+        for i in range(len(t)):
+            dic_1[t[i]] = dic_1.get(t[i],0) + 1
+        dic_2 = {}
+        start = 0
+        end = 1
+        dic_2[s[start]] = 1
+        dic_2[s[end]] = dic_2.get(s[end],0) + 1
+        while end < len(s):
+            if not get_corre(dic_1,dic_2):
+                end += 1
+                if end < len(s):
+                    dic_2[s[end]] = dic_2.get(s[end],0) + 1
+            else:
+                if end - start + 1 < res[-1]:
+                    res = [s[start:end + 1],end - start + 1]
+                dic_2[s[start]] -= 1
+                if not dic_2[s[start]]:
+                    del dic_2[s[start]]
+                start += 1
+        return res[0]
 
 
 
+import re
+def decodeString(s:str)->str:
+    patter=re.compile(r"(\d+)\[(\w+)\]")
+    m=patter.findall(s)
+    print(m)
+    while m:
+        for num,char in m:
+            s=s.replace("%s[%s]" % (num,char),char*int(num))
+        m=patter.findall(s)
+        print(m)
+    return s
 
-
-
+print(decodeString("abc3[cd]xyz"))
 
 
 
