@@ -51,6 +51,8 @@ def top_k(nums,k):
         sift(head,0,i - 1)
     return head
 
+
+print(top_k([1,5,43,23,54],3))
 ### rand5 -> rand7
 """
 5 * (rand5 - 1) [0,5,10,15,20]

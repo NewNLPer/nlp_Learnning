@@ -47,7 +47,7 @@ def topk(nums,k):
             if nums[j]<tmp:
                 nums[i]=nums[j]
                 i=j
-                j=2*1+1
+                j=2*i+1
             else:
                 break
         nums[i]=tmp
@@ -63,6 +63,9 @@ def topk(nums,k):
         sift(head,0,i-1)
     return head
 
+nums = [1,5,43,23,54]
+
+print(topk(nums,3))
 
 
 
