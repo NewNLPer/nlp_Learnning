@@ -116,8 +116,41 @@ def qiege(s):
                 continue
     bt(0,[])
     return res
-print(qiege("saad"))
+
+
+import dashscope
+
+# 设置API密钥
+dashscope.api_key = "sk-9e53478e820141c9b472154e45b6a1be"
 
 
 
+def sample_sync_call_streaming():
+    # 设置需要生成的指令
+    prompt_text = '用萝卜、土豆、茄子做饭，给我个菜谱。'
+    # 调用dashscope.Generation.call方法生成响应流
+    response_generator = dashscope.Generation.call(
+        model='qwen-turbo',
+        prompt=prompt_text,
+        stream=True,
+        top_p=0.8)
 
+    head_idx = 0
+    # 遍历响应流
+    for resp in response_generator:
+        # 获取每个响应中的文本段落
+        paragraph = resp.output['text']
+        # 打印文本段落中对应的文本
+        print("\r%s" % paragraph[head_idx:len(paragraph)], end='')
+        # 如果文本段落中存在换行符，则更新head_idx的值
+        if (paragraph.rfind('\n') != -1):
+            head_idx = paragraph.rfind('\n') + 1
+
+# 调用sample_sync_call_streaming函数
+sample_sync_call_streaming()
+
+
+"""
+python run_server.py --llm qwen-max --model_server dashscope --workstation_port 7864 --api_key sk-9e53478e820141c9b472154e45b6a1be --server_host 10.1.0.68
+
+"""
