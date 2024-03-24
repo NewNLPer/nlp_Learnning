@@ -134,3 +134,6 @@ def qiege(s):
     bt(0,[])
     return res
 print(qiege("aaasd"))
+
+
+nums = [1,23,4]
