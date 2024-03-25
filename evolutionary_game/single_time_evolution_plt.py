@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
 
-initial_x = [0.5, 0.5]
+initial_x = [0.2, 0.3]
 t = list(range(1, 200001))
 alph = 0.2
 yit = 0.1
@@ -47,7 +47,7 @@ def time_evloution(b,k_1,k_2):
             plt.ylabel(r'$\rho_c$')
             plt.semilogx(t, Collaborator_ratio, label="$k_{1}=%s$"%(k_1))
         plt.legend()
-        plt.title('$b=1.5,k_{2}=0.5$')
+        plt.title(r'$b=1.5$, $k_{2}=0.5$, $\varepsilon=%s$'%sit)
         plt.show()
 
         for k_1 in [0,0.3,0.7,1]:
@@ -57,7 +57,7 @@ def time_evloution(b,k_1,k_2):
             plt.ylabel('M')
             plt.semilogx(t,Degree_of_rewards_and_punishments,label="$k_{1}=%s$"%(k_1))
         plt.legend()
-        plt.title('$b=1.5,k_{2}=0.5$')
+        plt.title(r'$b=1.5$, $k_{2}=0.5$, $\varepsilon=%s$'%sit)
         plt.show()
 
     if k_2 == -1: # k_1 = [0,0.3,0.7,1]
@@ -84,4 +84,4 @@ def time_evloution(b,k_1,k_2):
 
 if __name__=="__main__":
 
-    time_evloution(1.5,0.5,-1)
+    time_evloution(1.5,-1,0.5)
