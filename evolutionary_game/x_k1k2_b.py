@@ -16,8 +16,8 @@ import random
 
 initial_x = [0.5, 0.5]
 t = list(range(1, 200001))
-alph = 0.1
-yit = 0.2
+alph = 0.2
+yit = 0.1
 sit = 0.1
 k_1 = 1
 k_2 = 1
@@ -128,7 +128,7 @@ def plt_b_ks_figure(b):
     plt.show()
 
 
-plt_b_ks_figure(b=1)
+plt_b_ks_figure(b=1.5)
 
 
 

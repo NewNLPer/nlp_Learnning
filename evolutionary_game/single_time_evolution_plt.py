@@ -12,7 +12,7 @@ from scipy.integrate import odeint
 
 initial_x = [0.5, 0.5]
 t = list(range(1, 200001))
-alph = 0.1
+alph = 0.2
 yit = 0.1
 sit = 0.1
 k_1 = 1
