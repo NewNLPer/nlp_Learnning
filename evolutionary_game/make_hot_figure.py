@@ -38,9 +38,9 @@ if __name__=="__main__":
 
     initial_x = [0.5, 0.5]
     t = list(range(1, 100001))
-    alph = 0.1
-    yit = 0.2
-    sit = 0.2
+    alph = 0.2
+    yit = 0.1
+    sit = 0.1
     k_1 = 0.5
     k_2 = 0.5
     b = 1.2

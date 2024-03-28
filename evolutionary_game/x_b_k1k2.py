@@ -40,8 +40,6 @@ def Cooperation_proportion_derivatives(x, t, b, alph, yit,sit,k_1,k_2):
 
 
 
-
-
 def linespace(start,end,interval): # 为防止精度溢出，定义间隔
 
     float_lens = len(str(interval).split(".")[-1])
