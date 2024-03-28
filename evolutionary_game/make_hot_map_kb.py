@@ -47,7 +47,7 @@ if __name__=="__main__":
     alph = 0.2
     yit = 0.1
     sit = 0.1
-    k_1 = 0.5
+    k_1 = 0.7
     k_2 = 0.5
     b = 1.8
     k1 = np.arange(0, 1.01, 0.01)
@@ -57,33 +57,33 @@ if __name__=="__main__":
     tem_b = np.arange(1, 2.01, 0.01)
 
 
-    for i in tqdm(range(len(k1))):
-        for j in range(len(k2)):
-            result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(b, alph, yit, sit, k1[i], k2[j]))
+    for i in tqdm(range(len(k2))):
+        for j in range(len(tem_b)):
+            result = odeint(Cooperation_proportion_derivatives, initial_x, t, args=(tem_b[j], alph, yit, sit, k_1, k2[i]))
             data_pc[i][j]=result[-1][0]
             data_m[i][j] = result[-1][-1]
 
 
     # 绘制第一个热图
-    plt.pcolormesh(k2, k1, data_pc, cmap='viridis', shading='auto')
+    plt.pcolormesh(tem_b, k2, data_pc, cmap='viridis', shading='auto')
     # 添加颜色条
     colorbar_pc = plt.colorbar()
     colorbar_pc.set_ticks([0, 0.2, 0.4, 0.6, 0.8, 1])
     # 添加标签和标题
-    plt.xlabel('$k_{2}$',fontsize=13)
-    plt.ylabel('$k_{1}$',fontsize=13)
-    plt.title("$b=%s$" % (b),fontsize=16)
+    plt.xlabel('$b$',fontsize=13)
+    plt.ylabel('$k_{2}$',fontsize=13)
+    plt.title("$k_{1}=%s$" % (k_1),fontsize=16)
     # 显示图形
     plt.show()
 
     # 绘制第二个热图
-    plt.pcolormesh(k2, k1, data_m, cmap='viridis')
+    plt.pcolormesh(tem_b, k2, data_m, cmap='viridis')
     # 添加颜色条
     colorbar_m = plt.colorbar()
     colorbar_m.set_ticks([0, 0.2, 0.4, 0.6, 0.8, 1])
     # 添加标签和标题
-    plt.xlabel('$k_{2}$',fontsize=13)
-    plt.ylabel('$k_{1}$',fontsize=13)
-    plt.title("$b=%s$" % (b),fontsize=16)
+    plt.xlabel('$b$',fontsize=13)
+    plt.ylabel('$k_{2}$',fontsize=13)
+    plt.title("$k_{1}=%s$" % (k_1),fontsize=16)
     # 显示图形
     plt.show()
