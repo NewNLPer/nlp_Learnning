@@ -22,8 +22,8 @@ import sentence_transformers
 from langchain.chains import RetrievalQA
 import warnings
 import os
-os.environ["BAICHUAN_API_KEY"] = "sk-df4297f3987923adcb5d6f60cd746b79"
-from langchain_community.llms import BaichuanLLM
+os.environ["ChatGLM_API_KEY"] = "sk-df4297f3987923adcb5d6f60cd746b79"
+from langchain_community.llms import ChatGLM
 
 warnings.filterwarnings("ignore")
 

@@ -50,8 +50,7 @@ def tok_k(nums,k):
         sift(head,0,i-1)
     return head
 
-nums = [1,2,4,5,3,542,2,54]
-print(tok_k(nums,3))
+
 
 """
 堆排序的时间复杂度
@@ -90,6 +89,59 @@ def get_r(nums,target):
     if end < 0 or nums[end] != target:
         return -1
     return end
+
+## 回溯算法
+def subset(nums):
+    res = []
+    def bt(start,path):
+        res.append(path[:])
+        for i in range(start,len(nums)):
+            if i == start or nums[i] != nums[i-1]:
+                path.append(nums[i])
+                bt(i+1,path)
+                path.pop()
+    bt(0,[])
+    return res
+
+def pailei(nums):
+    n = len(nums)
+    res = []
+    def bt(path,nums):
+        if len(path) == n:
+            res.append(path[:])
+        for i in range(len(nums)):
+            if not i or nums[i] != nums[i-1]:
+                path.append(nums[i])
+                bt(path,nums[:i]+nums[i+1:])
+                path.pop()
+    bt([],nums)
+    return res
+
+def qiefen(s):
+    res = []
+    def bt(start,path):
+        if start >= len(s):
+            res.append(path[:])
+        for i in range(start,len(s)):
+            p = s[start:i+1]
+            if p == p[::-1]:
+                path.append(p)
+                bt(i+1,path)
+                path.pop()
+            else:
+                continue
+    bt(0,[])
+    return res
+
+
+
+s="asd"
+print(s[:0])
+
+
+
+
+
 
 
 
