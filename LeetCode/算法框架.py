@@ -47,7 +47,7 @@ def topk(nums,k):
             if nums[j]<tmp:
                 nums[i]=nums[j]
                 i=j
-                j=2*1+1
+                j=2*i+1
             else:
                 break
         nums[i]=tmp
@@ -63,6 +63,9 @@ def topk(nums,k):
         sift(head,0,i-1)
     return head
 
+nums = [1,5,43,23,54]
+
+print(topk(nums,3))
 
 
 
@@ -160,6 +163,7 @@ def re_pailie(nums):### 有重复数组
                 bt(path,nums[:i]+nums[i+1:])
                 path.pop()
     bt([],nums)
+
     return res
 
 '''
@@ -610,12 +614,52 @@ def rechazhao1(nums,target):
     return -1
 
 
-nums11=[1,2,5,7,9,10]
+def countPaths(grid) -> int:
+    hang = len(grid)
+    lie = len(grid[0])
+    def dfs(i,j):
+        res = 1
+        for item in [(i-1,j),(i+1,j),(i,j-1),(i,j+1)]:
+            if 0 <= item[0] < hang and 0 <= item[1] < lie and grid[item[0]][item[1]] > grid[i][j]:
+                res += dfs(item[0],item[1])
+        return res
+    ans = 0
+    for i in range(hang):
+        for j in range(lie):
+            ans += dfs(i,j)
+            ans %= (10**9+7)
+    return ans
 
-print(rechazhao(nums11,6))
-print(rechazhao1(nums11,6))
+
+def fib(n: int) -> int:
+
+    dp = [0] * (n + 2)
+    dp[1] = 1
+    if n<=1:
+        return dp[n]
+    else:
+        for i in range(2,n+1):
+            dp[i] = dp[i-1] + dp[i-2]
+        return dp[n] % 1000000007
 
 
+def countSubstrings(s: str) -> int:
+    n=len(s)
+    dp=[[0] * n for _ in range(n)]
+    res=0
+    for i in range(n):
+        dp[i][i]=1
+        res+=1
+    for i in range(n-1,-1,-1):
+        for j in range(i+1,n):
+            if s[i] == s[j]:
+                if j - i == 1:
+                    dp[i][j] = 1
+                    res += 1
+            else:
+                dp[i][j] = dp[i+1][j-1]
+                if dp[i][j]:
+                    res += 1
+    return res
 
-
-
+print(countSubstrings("abc"))
