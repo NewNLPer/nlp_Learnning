@@ -19,4 +19,5 @@ def about():
 
 # 运行应用
 if __name__ == '__main__':
-    app.run()
+
+    app.run(host = "10.5.159.149",port=5910)

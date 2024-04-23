@@ -4,25 +4,22 @@
 @time: 2024/3/13 16:48
 coding with comment！！！
 """
-import uvicorn
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = "7"
 from fastapi import FastAPI
 from pydantic import BaseModel
-import uvicorn, json, datetime
+import uvicorn
 import torch
-import os
-from transformers import AutoModel, AutoTokenizer
-from transformers.generation.utils import GenerationConfig
-# os.environ['CUDA_VISIBLE_DEVICES'] = "7"
-
+from transformers import AutoModelForCausalLM, AutoTokenizer
 app = FastAPI()
 
 class Query(BaseModel):
     text: str
 
+model_path = "/home/ubuntu/model/baichuan-inc/Baichuan2-7B-Base"
 
-model_path = "/data/ubuntu/public/models/chatglm_6b"
-tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
-model = AutoModel.from_pretrained(model_path, trust_remote_code=True).half().cuda()
+tokenizer = AutoTokenizer.from_pretrained(model_path)
+model = AutoModelForCausalLM.from_pretrained(model_path,torch_dtype=torch.float16).cuda()
 model = model.eval()
 
 @app.post("/chat/")
@@ -40,7 +37,8 @@ async def chat(query: Query):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="10.1.0.68", port=1022)
+    uvicorn.run(app, host="192.168.32.23", port=5910)
+
    #  import requests
    #  url="http://10.1.0.68:1022/chat/"
    #  query ={"text":"你是谁？"}
@@ -51,5 +49,3 @@ if __name__ == "__main__":
    # else:
    #     print("Error:",response.status_code, response.text)
 
-
-print(input())
