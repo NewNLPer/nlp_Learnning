@@ -31,6 +31,7 @@ class Sort_dic():
         self.dic[key] = value
 
     def get_similar_text(self):
+        self.dic = dict(sorted(self.dic.items(), key=lambda item: item[1]))
         for key in self.dic:
             print(key)
             print(self.dic[key])
