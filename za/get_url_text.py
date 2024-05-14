@@ -27,7 +27,7 @@ def get_text_from_url(url):
     return text
 
 # 示例URL
-url = 'https://www.gov.cn/zhengce/zhengceku/2020-12/29/content_5574650.htm'
+url = 'https://www.tsinghua.edu.cn/info/1094/82878.htm'
 text = get_text_from_url(url)
 print(type(text))
 print(text)
