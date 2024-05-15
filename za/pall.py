@@ -13,8 +13,10 @@ warnings.filterwarnings("ignore")
 from text2vec import SentenceModel
 from tqdm import tqdm
 
-
 class Sort_dic():
+    """
+    定义一类具有容量要求的排序字典，方便召回最相关的文段
+    """
     def __init__(self,nums):
         self.dic = {}
         self.nums = nums
@@ -36,41 +38,40 @@ class Sort_dic():
             print("对应句为：%s"%(item))
             print('================================================')
 
-
-
-
 def get_cos_sm(text1_em,text2_em):
+    """
+    计算文本cos相似度
+    :param text1_em:
+    :param text2_em:
+    :return:
+    """
     text1 = np.array(text1_em)
     text2 = np.array(text2_em)
     similarity = 1 - cosine(text1, text2)
     return similarity
 
-
 if __name__ == "__main__":
-    question = "考试可以作弊嘛？"
 
-    similar_text = Sort_dic(5)
-
+    question = "学生考试可以作弊嘛？"
+    # 定义一个可以存储3个值的排序字典，key为字段，value为cos相似度
+    similar_text = Sort_dic(3)
     em_model_path = "D:\google下载"
-
-    txt_path = r"C:\Users\NewNLPer\Desktop\school_rule.txt"
-
+    txt_path = r"C:\Users\NewNLPer\Desktop\school_rule_pre_2.txt"
+    # 加载词嵌入权重
     t2v_model = SentenceModel(em_model_path)
-
+    # 计算question的词嵌入矩阵
     oral_em = em = t2v_model.encode(question)
-
     with open(txt_path,"r",encoding="utf-8") as f:
-
         lines = f.readlines()
-
+        # 遍历知识库里的每个字段
         for item in tqdm(lines):
-
+            # 计算知识库里每个字段的词嵌入矩阵
             em = t2v_model.encode(item)
-
+            # 计算cos相似度
             simi = get_cos_sm(oral_em,em)
-
+            # 将cos相似度值大的放进上述定义的容器里
             similar_text.add_item(item,simi)
-
+        # 打印容器里的值
         similar_text.get_similar_text()
 
 

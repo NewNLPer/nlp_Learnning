@@ -9,7 +9,7 @@ import warnings
 warnings.filterwarnings("ignore")
 from text2vec import SentenceModel
 
-txt_path = r"C:\Users\NewNLPer\Desktop\school_rule.txt"
+txt_path = r"C:\Users\NewNLPer\Desktop\school_rule_pre_2.txt"
 
 em_model_path = "D:\google下载"
 
