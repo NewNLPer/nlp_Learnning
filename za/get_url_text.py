@@ -13,9 +13,8 @@ warnings.filterwarnings("ignore")
 save_path = r"C:\Users\NewNLPer\Desktop\school_rule.txt"
 
 url_list =[
-            'https://www.tsinghua.edu.cn/info/1094/82878.htm',
-           "https://www.gov.cn/zhengce/zhengceku/2020-12/29/content_5574650.htm",
-           "http://www.moe.gov.cn/jyb_xxgk/gk_gbgg/moe_0/moe_495/moe_1073/tnull_11916.html"
+            "https://www.tsinghua.edu.cn/info/1094/82878.htm",
+            "https://teach.dlut.edu.cn/info/1055/3310.htm"
            ]
 
 def get_text_from_url(url):
