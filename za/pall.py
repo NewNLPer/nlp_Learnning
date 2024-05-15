@@ -32,11 +32,8 @@ class Sort_dic():
             self.dic[key] = value
 
     def get_similar_text(self):
-        self.dic = dict(sorted(self.dic.items(), key=lambda x: x[1]))
-        for item in self.dic:
-            print("相似度为：%s"%(self.dic[item]))
-            print("对应句为：%s"%(item))
-            print('================================================')
+        self.dic = dict(sorted(self.dic.items(), key=lambda x: x[1],reverse = True))
+        return self.dic
 
 def get_cos_sm(text1_em,text2_em):
     """
@@ -50,9 +47,24 @@ def get_cos_sm(text1_em,text2_em):
     similarity = 1 - cosine(text1, text2)
     return similarity
 
+
+def get_completion(s):
+    from zhipuai import ZhipuAI
+    client = ZhipuAI(api_key="eeb680feddd64f2867b5f156a4f1d3e2.Gub5EM1kBosl6894")  # 填写您自己的APIKey
+    response = client.chat.completions.create(
+        model="glm-4",  # 填写需要调用的模型名称
+        messages=[
+            {"role": "user", "content": s},
+        ],
+    )
+    return response.choices[0].message.content
+
+
+
+
 if __name__ == "__main__":
 
-    question = "学生考试可以作弊嘛？"
+    question = "学生打架斗殴应该如何处理？"
     # 定义一个可以存储3个值的排序字典，key为字段，value为cos相似度
     similar_text = Sort_dic(3)
     em_model_path = "D:\google下载"
@@ -72,7 +84,11 @@ if __name__ == "__main__":
             # 将cos相似度值大的放进上述定义的容器里
             similar_text.add_item(item,simi)
         # 打印容器里的值
-        similar_text.get_similar_text()
+
+    in_context = similar_text.get_similar_text()
+    prompt = "给定一个问题和一段相关文本，请根据提供的相关文本回答该问题。问题：{},相关文本：{}".format(question,next(iter(in_context)))
+    print(prompt)
+    print(get_completion(prompt))
 
 
 
