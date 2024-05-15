@@ -15,26 +15,28 @@ from tqdm import tqdm
 
 
 class Sort_dic():
-
     def __init__(self,nums):
         self.dic = {}
         self.nums = nums
-    def del_(self):
-        dic_s = dict(sorted(self.dic.items(), key=lambda item: item[1]))
-        key = next(iter(dic_s))
-        dic_s.pop(key)
-        return dic_s
 
     def add_item(self, key, value):
+        # 如果字典项数已达到最大值，删除最小值的项
         if len(self.dic) >= self.nums:
-            self.dic = self.del_()
-        self.dic[key] = value
+            min_key = min(self.dic, key=self.dic.get)
+            if self.dic[min_key] < value:
+                del self.dic[min_key]
+                self.dic[key] = value
+        else:
+            self.dic[key] = value
 
     def get_similar_text(self):
-        self.dic = dict(sorted(self.dic.items(), key=lambda item: item[1]))
-        for key in self.dic:
-            print(key)
-            print(self.dic[key])
+        self.dic = dict(sorted(self.dic.items(), key=lambda x: x[1]))
+        for item in self.dic:
+            print("相似度为：%s"%(self.dic[item]))
+            print("对应句为：%s"%(item))
+            print('================================================')
+
+
 
 
 def get_cos_sm(text1_em,text2_em):
@@ -45,7 +47,7 @@ def get_cos_sm(text1_em,text2_em):
 
 
 if __name__ == "__main__":
-    question = "学生能不能逃课？"
+    question = "考试可以作弊嘛？"
 
     similar_text = Sort_dic(5)
 
@@ -67,9 +69,10 @@ if __name__ == "__main__":
 
             simi = get_cos_sm(oral_em,em)
 
-            similar_text.add_item(simi,item)
+            similar_text.add_item(item,simi)
 
-    similar_text.get_similar_text()
+        similar_text.get_similar_text()
+
 
 
 
