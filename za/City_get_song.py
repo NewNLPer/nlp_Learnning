@@ -10,7 +10,7 @@ import warnings
 from tqdm import tqdm
 warnings.filterwarnings("ignore")
 
-save_path = r"C:\Users\NewNLPer\Desktop\city_2.txt"
+save_path = r""
 
 City_url_list =[
             "https://travel.qunar.com/p-cs299783-qingdao-jingdian-3-1",#青岛
@@ -24,6 +24,7 @@ City_url_list =[
             "https://travel.qunar.com/p-cs299823-liaocheng-jingdian-3-1",#聊城
             "https://travel.qunar.com/p-cs300153-rizhao-jingdian-3-1"#日照
            ]
+
 
 def get_travel_info(text):
     area = None
@@ -50,6 +51,7 @@ def get_travel_info(text):
         "建议游览时间": travel_time
     }
 
+
 def get_text_from_url(url):
     # 发送HTTP请求并获取响应
     response = requests.get(url)
@@ -63,23 +65,22 @@ def get_text_from_url(url):
     return text.split("\n")
 
 
-
 def extract_links(url):
     # 发送HTTP请求获取网页内容
     response = requests.get(url)
     if response.status_code != 200:
         raise Exception(f"Failed to retrieve the webpage. Status code: {response.status_code}")
-
     # 使用BeautifulSoup解析HTML
     soup = BeautifulSoup(response.content, 'html.parser')
-
     # 找到所有的<a>标签
     a_tags = soup.find_all('a')
-
     # 提取href属性中的链接
     links = [a.get('href') for a in a_tags if a.get('href')]
-
-    return links
+    url_set = set()
+    for link in links:
+        if "p-oi" in link:
+            url_set.add(link)
+    return url_set
 
 
 # 示例使用
