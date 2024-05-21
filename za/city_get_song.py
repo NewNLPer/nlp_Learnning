@@ -5,7 +5,7 @@
 coding with comment！！！
 """
 import json
-
+import time
 import requests
 from bs4 import BeautifulSoup
 import warnings
@@ -89,10 +89,12 @@ if __name__ == "__main__":
     errno_nums = 0
     knowlegde = {}
     for key in tqdm(city_url_list,"地级市遍历中 ... "):
+        time.sleep(5)
         song_url = extract_links(city_url_list[key])
         nums = 1
         knowlegde[key] = {}
         for item in tqdm(song_url,desc="各景点数据抽取中 ... "):
+            time.sleep(5)
             text = get_text_from_url(item)
             try:
             # print("对应的网址是{}".format(item))
