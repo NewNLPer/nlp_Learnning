@@ -4,6 +4,8 @@
 @time: 2024/5/21 17:41
 coding with comment！！！
 """
+import json
+
 import requests
 from bs4 import BeautifulSoup
 import warnings
@@ -12,18 +14,18 @@ warnings.filterwarnings("ignore")
 
 save_path = r""
 
-City_url_list =[
-            "https://travel.qunar.com/p-cs299783-qingdao-jingdian-3-1",#青岛
-            "https://travel.qunar.com/p-cs300150-jinan-jingdian-3-1",#济南
-            "https://travel.qunar.com/p-cs299824-yantai-jingdian-3-1",#烟台
-            "https://travel.qunar.com/p-cs300151-taian-jingdian-3-1",#泰安
-            "https://travel.qunar.com/p-cs300115-weihai-jingdian-3-1",#威海
-            "https://travel.qunar.com/p-cs299800-weifang-jingdian-3-1",#潍坊
-            "https://travel.qunar.com/p-cs300114-linyi-jingdian-3-1",#临沂
-            "https://travel.qunar.com/p-cs300154-zaozhuang-jingdian-3-1",#枣庄
-            "https://travel.qunar.com/p-cs299823-liaocheng-jingdian-3-1",#聊城
-            "https://travel.qunar.com/p-cs300153-rizhao-jingdian-3-1"#日照
-           ]
+city_url_list = {
+    "青岛": "https://travel.qunar.com/p-cs299783-qingdao-jingdian-3-1",  # 青岛
+    "济南": "https://travel.qunar.com/p-cs300150-jinan-jingdian-3-1",     # 济南
+    "烟台": "https://travel.qunar.com/p-cs299824-yantai-jingdian-3-1",   # 烟台
+    "泰安": "https://travel.qunar.com/p-cs300151-taian-jingdian-3-1",     # 泰安
+    "威海": "https://travel.qunar.com/p-cs300115-weihai-jingdian-3-1",    # 威海
+    "潍坊": "https://travel.qunar.com/p-cs299800-weifang-jingdian-3-1",   # 潍坊
+    "临沂": "https://travel.qunar.com/p-cs300114-linyi-jingdian-3-1",     # 临沂
+    "枣庄": "https://travel.qunar.com/p-cs300154-zaozhuang-jingdian-3-1", # 枣庄
+    "聊城": "https://travel.qunar.com/p-cs299823-liaocheng-jingdian-3-1", # 聊城
+    "日照": "https://travel.qunar.com/p-cs300153-rizhao-jingdian-3-1"     # 日照
+}
 
 
 def get_travel_info(text):
@@ -83,22 +85,24 @@ def extract_links(url):
     return url_set
 
 
-# 示例使用
-
-
 if __name__ == "__main__":
-    url = 'https://travel.qunar.com/p-cs300115-weihai-jingdian'
-    links = extract_links(url)
-    url_set = set()
-    for link in links:
-        if "p-oi" in link:
-            url_set.add(link)
-    for item in url_set:
-        print(item)
+
+    knowlegde = {}
+    for key in tqdm(city_url_list,"地级市遍历中 ... "):
+        song_url = extract_links(city_url_list[key])
+        nums = 1
+        knowlegde[key] = {}
+        for item in tqdm(song_url,desc="各景点数据抽取中 ... "):
+            text = get_text_from_url(item)
+            main_dic = get_travel_info(text)
+            knowlegde[key]["景点"+str(nums)] = main_dic
+            nums += 1
+        print(json.dumps(knowlegde,ensure_ascii=False))
+        exit()
 
 
-    # text = get_text_from_url(url_list[0])
-    # print(get_travel_info(text))
+
+
 
 
 
