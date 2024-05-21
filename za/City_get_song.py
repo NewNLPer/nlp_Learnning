@@ -12,7 +12,7 @@ import warnings
 from tqdm import tqdm
 warnings.filterwarnings("ignore")
 
-save_path = r""
+save_path = r"C:\Users\NewNLPer\Desktop\knowledge_seed.json"
 
 city_url_list = {
     "青岛": "https://travel.qunar.com/p-cs299783-qingdao-jingdian-3-1",  # 青岛
@@ -34,7 +34,7 @@ def get_travel_info(text):
     travel_time = "2小时"
     intro = 0
 
-    for i in tqdm(range(len(text)), desc="Processing travel info..."):
+    for i in range(len(text)):
         if text[i] == "驴友点评" and not intro:
             start = i + 4
             while start < len(text) and text[start] != "地址:":
@@ -86,7 +86,7 @@ def extract_links(url):
 
 
 if __name__ == "__main__":
-
+    errno_nums = 0
     knowlegde = {}
     for key in tqdm(city_url_list,"地级市遍历中 ... "):
         song_url = extract_links(city_url_list[key])
@@ -94,11 +94,21 @@ if __name__ == "__main__":
         knowlegde[key] = {}
         for item in tqdm(song_url,desc="各景点数据抽取中 ... "):
             text = get_text_from_url(item)
-            main_dic = get_travel_info(text)
+            try:
+                main_dic = get_travel_info(text)
+            except:
+                errno_nums += 1
+                print()
+                print("已出现{}条错误".format(errno_nums))
+                continue
             knowlegde[key]["景点"+str(nums)] = main_dic
             nums += 1
-        print(json.dumps(knowlegde,ensure_ascii=False))
-        exit()
+    print("数据处理完毕，正在写入{}".format(save_path))
+
+    with open(save_path,"w",encoding="utf-8") as f:
+        f.write(json.dumps(knowlegde,ensure_ascii=False))
+
+    print("已完成！！！")
 
 
 
