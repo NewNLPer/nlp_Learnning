@@ -12,10 +12,18 @@ warnings.filterwarnings("ignore")
 
 save_path = r"C:\Users\NewNLPer\Desktop\city_2.txt"
 
-url_list =[
-            "https://travel.qunar.com/p-oi710634-daimiao"
+City_url_list =[
+            "https://travel.qunar.com/p-cs299783-qingdao-jingdian-3-1",#青岛
+            "https://travel.qunar.com/p-cs300150-jinan-jingdian-3-1",#济南
+            "https://travel.qunar.com/p-cs299824-yantai-jingdian-3-1",#烟台
+            "https://travel.qunar.com/p-cs300151-taian-jingdian-3-1",#泰安
+            "https://travel.qunar.com/p-cs300115-weihai-jingdian-3-1",#威海
+            "https://travel.qunar.com/p-cs299800-weifang-jingdian-3-1",#潍坊
+            "https://travel.qunar.com/p-cs300114-linyi-jingdian-3-1",#临沂
+            "https://travel.qunar.com/p-cs300154-zaozhuang-jingdian-3-1",#枣庄
+            "https://travel.qunar.com/p-cs299823-liaocheng-jingdian-3-1",#聊城
+            "https://travel.qunar.com/p-cs300153-rizhao-jingdian-3-1"#日照
            ]
-
 
 def get_travel_info(text):
     area = None
@@ -54,9 +62,42 @@ def get_text_from_url(url):
     text = soup.get_text(separator='\n', strip=True)
     return text.split("\n")
 
+
+
+def extract_links(url):
+    # 发送HTTP请求获取网页内容
+    response = requests.get(url)
+    if response.status_code != 200:
+        raise Exception(f"Failed to retrieve the webpage. Status code: {response.status_code}")
+
+    # 使用BeautifulSoup解析HTML
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    # 找到所有的<a>标签
+    a_tags = soup.find_all('a')
+
+    # 提取href属性中的链接
+    links = [a.get('href') for a in a_tags if a.get('href')]
+
+    return links
+
+
+# 示例使用
+
+
 if __name__ == "__main__":
-    text = get_text_from_url(url_list[0])
-    print(get_travel_info(text))
+    url = 'https://travel.qunar.com/p-cs300115-weihai-jingdian'
+    links = extract_links(url)
+    url_set = set()
+    for link in links:
+        if "p-oi" in link:
+            url_set.add(link)
+    for item in url_set:
+        print(item)
+
+
+    # text = get_text_from_url(url_list[0])
+    # print(get_travel_info(text))
 
 
 
