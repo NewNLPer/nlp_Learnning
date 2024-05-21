@@ -10,11 +10,10 @@ import warnings
 from tqdm import tqdm
 warnings.filterwarnings("ignore")
 
-save_path = r"C:\Users\NewNLPer\Desktop\school_rule.txt"
+save_path = r"C:\Users\NewNLPer\Desktop\city_.txt"
 
 url_list =[
-            "https://www.tsinghua.edu.cn/info/1094/82878.htm",
-            "https://teach.dlut.edu.cn/info/1055/3310.htm"
+            "https://travel.qunar.com/p-oi711062-daminghujingqu"
            ]
 
 def get_text_from_url(url):
