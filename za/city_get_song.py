@@ -95,7 +95,9 @@ if __name__ == "__main__":
         for item in tqdm(song_url,desc="各景点数据抽取中 ... "):
             text = get_text_from_url(item)
             try:
+            # print("对应的网址是{}".format(item))
                 main_dic = get_travel_info(text)
+            # print("对应的网址是{}".format(item))
             except:
                 errno_nums += 1
                 print()
