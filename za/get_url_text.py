@@ -10,10 +10,10 @@ import warnings
 from tqdm import tqdm
 warnings.filterwarnings("ignore")
 
-save_path = r"C:\Users\NewNLPer\Desktop\city_.txt"
+save_path = r"C:\Users\NewNLPer\Desktop\city_2.txt"
 
 url_list =[
-            "https://travel.qunar.com/p-oi711062-daminghujingqu"
+            "https://travel.qunar.com/p-oi707752-dongpinghu"
            ]
 
 def get_text_from_url(url):
