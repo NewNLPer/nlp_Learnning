@@ -5,18 +5,12 @@
 coding with comment！！！
 """
 
-import requests
-import json
-
-import requests
-import json
-
-
 import json
 import requests
-import pandas as pd
+
 
 key = "8d8b55e388a180c9c7913e8f5e8ab10b"
+
 
 def get_lon_lat(i):
     url = 'https://restapi.amap.com/v3/geocode/geo?parameters'

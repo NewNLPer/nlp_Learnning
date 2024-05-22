@@ -12,8 +12,10 @@ import warnings
 from tqdm import tqdm
 warnings.filterwarnings("ignore")
 
+# 景点知识库的保存路径
 save_path = r"C:\Users\NewNLPer\Desktop\knowledge_seed.json"
 
+# 去哪儿官网的地级市景点信息列表
 city_url_list = {
     "青岛": "https://travel.qunar.com/p-cs299783-qingdao-jingdian-3-1",  # 青岛
     "济南": "https://travel.qunar.com/p-cs300150-jinan-jingdian-3-1",     # 济南
@@ -27,8 +29,18 @@ city_url_list = {
     "日照": "https://travel.qunar.com/p-cs300153-rizhao-jingdian-3-1"     # 日照
 }
 
-
 def get_travel_info(text):
+    """
+    :param text: 爬取的网页文本 type==list
+    :return:
+    "景点*":{
+                "景点名称": " ** ",
+                "地点位置": " ** ",
+                "景点简要介绍": " ** ",
+                "景点详细介绍": " ** ",
+                "建游览时间": " ** "
+            }
+    """
     area = None
     introduction = []
     travel_time = "2小时"
@@ -89,31 +101,28 @@ if __name__ == "__main__":
     errno_nums = 0
     knowlegde = {}
     for key in tqdm(city_url_list,"地级市遍历中 ... "):
+        # qps太高，会导致ip被封禁
         time.sleep(5)
         song_url = extract_links(city_url_list[key])
         nums = 1
         knowlegde[key] = {}
         for item in tqdm(song_url,desc="各景点数据抽取中 ... "):
+            # qps太高，会导致ip被封禁
             time.sleep(5)
             text = get_text_from_url(item)
             try:
-            # print("对应的网址是{}".format(item))
                 main_dic = get_travel_info(text)
-            # print("对应的网址是{}".format(item))
             except:
                 errno_nums += 1
-                print()
                 print("已出现{}条错误".format(errno_nums))
                 continue
+
             knowlegde[key]["景点"+str(nums)] = main_dic
             nums += 1
     print("数据处理完毕，正在写入{}".format(save_path))
-
     with open(save_path,"w",encoding="utf-8") as f:
         f.write(json.dumps(knowlegde,ensure_ascii=False))
-
-    print("已完成！！！")
-
+    print("景点知识库已成功写入{}！".format(save_path))
 
 
 
