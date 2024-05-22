@@ -16,6 +16,7 @@ warnings.filterwarnings("ignore")
 
 gaode_api_key = "8d8b55e388a180c9c7913e8f5e8ab10b"
 zhipu_api_key = "042436202c1b74e82bda600ffb2d7c5d.SJgSFxMKmg0RgcZc"
+
 class Sort_dic():
     def __init__(self,nums):
         self.dic = {}
@@ -37,8 +38,9 @@ class Sort_dic():
 
 class My_langchain():
     def __init__(self,knowledge_file_path,em_model_path):
-
+        # 景点知识库文件地址
         self.knowledge_file = knowledge_file_path
+        # 词嵌入矩阵模型权重地址
         self.em_model_path = em_model_path
         with open(self.knowledge_file,"r",encoding="utf-8") as f:
             self.knowledge = json.load(f)
@@ -75,7 +77,7 @@ class My_langchain():
         :return: 目的地与旅游意图相符的k个景点
         """
         sight = []
-        if not traval_goo:
+        if not traval_goo:# 如果没有旅行意图，仅检索前k，因为爬取的时候是按照人气爬取的，所以合理。
             for item in self.knowledge[city]:
                 intro = "景点名称：{}，地点位置：{}，景点介绍：{}，建议游览时间：{}".format(
                     self.knowledge[city][item]["景点名称"],
@@ -86,7 +88,7 @@ class My_langchain():
                 sight.append(intro)
                 if len(sight) == k:
                     break
-        else:
+        else:# 若有意图将意图与景点的简要介绍计算相似度，取相似度最高的前k个。
             recall_sm = Sort_dic(k)
             for item in self.knowledge[city]:
                 simi = self.get_cos_sm(traval_goo,self.knowledge[city][item]["景点简要介绍"])
@@ -104,12 +106,12 @@ class My_langchain():
         return sight
 
 
-def get_completion(s):
+def get_completion(prompt):
     client = ZhipuAI(api_key=zhipu_api_key)  # 填写您自己的APIKey
     response = client.chat.completions.create(
         model="glm-4",  # 填写需要调用的模型名称
         messages=[
-            {"role": "user", "content": s},
+            {"role": "user", "content": prompt},
         ],
     )
     return response.choices[0].message.content
@@ -127,18 +129,18 @@ def get_lon_lat(i):
     return lon_lat
 
 def routes(origin,destination):
-    origin  = get_lon_lat(origin)
-    destination = get_lon_lat(destination)
-    parameters = {'key':gaode_api_key,'origin':origin,'destination':destination}
+    origin_1  = get_lon_lat(origin)
+    destination_1 = get_lon_lat(destination)
+    parameters = {'key':gaode_api_key,'origin':origin_1,'destination':destination_1}
     response = requests.get('https://restapi.amap.com/v3/direction/driving?parameters',params=parameters)
     text = json.loads(response.text)
     duration = text['route']['paths'][0]['duration']
-    return "从{}到{}驾车需要{}".format(origin, destination, str(round(int(duration)/3600,2)) + "h")
+    return "从{}到{}驾车需要{}个小时。".format(origin, destination, str(round(int(duration)/3600,2)))
 
 
-def get_concat_prompt(sight,traval_time,question):
+def get_Final_Prompt(sight,traval_time,question):
     promot = """
-    下面是一些景点信息，请根据用户的需求帮其指定一个旅游的行程规划。
+    下面是一些景点信息和行程消耗时间，请根据用户的需求帮其指定一个旅游的行程规划。
     用户需求：{}
     路程时间：{}
     目的地相关景点信息：{}
@@ -146,7 +148,7 @@ def get_concat_prompt(sight,traval_time,question):
     return promot.format(question,traval_time,"\n".join(sight))
 
 def main():
-    recall_k = 5
+    recall_k = 8
     knowledge_file_path = r"C:\Users\NewNLPer\Desktop\knowledge_seed.json"
     em_model_path = "D:\google下载"
 
@@ -175,11 +177,18 @@ def main():
     gs = My_langchain(knowledge_file_path,em_model_path)
 
     sight = gs.get_some_sight(extral_inf["目的地"],extral_inf["旅游意愿"],recall_k)
+
     traval_time = routes(extral_inf["出发地"],extral_inf["目的地"])
 
-    finall_prompt = get_concat_prompt(sight,traval_time,question)
+    finall_prompt = get_Final_Prompt(sight,traval_time,question)
 
     print(finall_prompt)
+
+    answer = get_completion(finall_prompt)
+
+    print()
+
+    print(answer)
 
 
 
@@ -188,5 +197,5 @@ if __name__ == "__main__":
     main()
 
 """
-我目前在烟台市，我想去泰安旅游，请帮我规划一个三天的行程。
+我目前在烟台市，我想去日照看海，请帮我规划一个两天的行程。
 """
