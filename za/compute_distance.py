@@ -8,19 +8,22 @@ coding with comment！！！
 import json
 import requests
 
-
+# 申请的高德的Api-key
 key = "8d8b55e388a180c9c7913e8f5e8ab10b"
 
+"""
+更详细的信息可参考官方技术文档，https://lbs.amap.com/api/webservice/guide/api/direction#bus
+"""
 
 def get_lon_lat(i):
     url = 'https://restapi.amap.com/v3/geocode/geo?parameters'
     parameters = {
-        'key':key,   							##输入自己的key
+        'key':key,
         'address':'%s' % i
         }
     page_resource = requests.get(url,params=parameters)
-    text = page_resource.text       ##获得数据是json格式
-    data = json.loads(text)         ##把数据变成字典格式
+    text = page_resource.text
+    data = json.loads(text)
     lon_lat = data["geocodes"][0]['location']
     return lon_lat
 
@@ -28,13 +31,18 @@ def routes(origin,destination):
     origin  = get_lon_lat(origin)
     destination = get_lon_lat(destination)
     parameters = {'key':key,'origin':origin,'destination':destination}
-    ##参数的输入，可以按照自己的需求选择出行时间最短，出行距离最短，不走高速等方案，结合自己需求设置，参考手册
     response = requests.get('https://restapi.amap.com/v3/direction/driving?parameters',params=parameters)
     text = json.loads(response.text)
-    # print(text)
-    duration = text['route']['paths'][0]['duration'] ##出行时间
-    ## 可以自己打印text看一下，能提取很多参数，出行时间、出行费用、出行花费等看自己需求提取
+    duration = text['route']['paths'][0]['duration']
+    # 换算成小时
+    return str(round(int(duration)/3600,2)) + "h"
 
-    return duration/3600
+if __name__ == "__main__":
+
+    city_1 = "日照"
+    city_2 = "青岛"
+    traval_time_sum = routes(city_1,city_2)
+    print("从{}到{}驾车需要{}".format(city_1,city_2,traval_time_sum))
+
 
 

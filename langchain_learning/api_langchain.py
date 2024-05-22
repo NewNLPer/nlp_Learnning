@@ -23,6 +23,7 @@ from langchain.chains import RetrievalQA
 import warnings
 import os
 os.environ["ChatGLM_API_KEY"] = "sk-df4297f3987923adcb5d6f60cd746b79"
+
 from langchain_community.llms import ChatGLM
 
 warnings.filterwarnings("ignore")
@@ -56,11 +57,12 @@ db.save_local(r"C:\Users\NewNLPer\Desktop\za\some_test\faiss") # 指定Faiss的�
 #  db = FAISS.load_local("/data/ubuntu/jijiezhou/data/faiss/",embeddings=embeddings)
 db = FAISS.load_local(r"C:\Users\NewNLPer\Desktop\za\some_test\faiss", embeddings=embeddings, allow_dangerous_deserialization=True)
 
-llm = BaichuanLLM()
+llm = ChatGLM()
 
 
 if __name__ == "__main__":
     while True:
+
 
         question = input()
         similarDocs = db.similarity_search(question, include_metadata = True, k = 3)
@@ -70,12 +72,7 @@ if __name__ == "__main__":
             print(item.page_content)
             print("=========================================================")
 
-
         retriever = db.as_retriever()
         qa = RetrievalQA.from_chain_type(llm = llm, chain_type = "stuff", retriever = retriever)
         answer = qa.run((question+","+"请用中文来回答相关问题。"))
         print("BaichuanLLM的回答：" + answer)
-
-"""
-学生能抄作业嘛？
-"""

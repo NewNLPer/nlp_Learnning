@@ -81,8 +81,6 @@ if __name__ == "__main__":
         for item in similarDocs:
             print(item.page_content)
             print("=========================================================")
-
-
         retriever = db.as_retriever()
         qa = RetrievalQA.from_chain_type(llm = llm, chain_type = "stuff", retriever = retriever)
         answer = qa.run((question))
