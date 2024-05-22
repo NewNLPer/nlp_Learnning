@@ -5,6 +5,8 @@
 coding with comment！！！
 """
 import json
+import time
+
 from text2vec import SentenceModel
 import numpy as np
 from scipy.spatial.distance import cosine
@@ -152,7 +154,8 @@ def main():
     knowledge_file_path = r"C:\Users\NewNLPer\Desktop\knowledge_seed.json"
     em_model_path = "D:\google下载"
 
-    question = input("question：")
+    # question = input("question：")
+    question = "我目前在日照市，我想去威海看大海，请帮我规划一个三天的行程。"
 
     prompt = """
     给定一个问题，请帮我对其进行信息抽取，仅需输出抽取后的结果即可.请严格按照给定的格式进行信息抽取，抽取信息后的输出格式为：
@@ -179,7 +182,8 @@ def main():
     traval_time = routes(extral_inf["出发地"],extral_inf["目的地"])
     finall_prompt = get_Final_Prompt(sight,traval_time,question)
     # print(finall_prompt)
-    answer = get_Final_Prompt(question)
+    answer = get_completion(question)
+    time.sleep(10)
     answer_rag = get_completion(finall_prompt)
     print(answer)
     print('==================================================')
