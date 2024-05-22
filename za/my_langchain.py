@@ -171,24 +171,19 @@ def main():
     请根据上述样例，对下面的问题进行信息抽取，仅需输出抽取后的结果即可。
     new_question = "{}"
     """
+
     prompt = prompt.format(question)
     extral_inf = json.loads(get_completion(prompt))
-
     gs = My_langchain(knowledge_file_path,em_model_path)
-
     sight = gs.get_some_sight(extral_inf["目的地"],extral_inf["旅游意愿"],recall_k)
-
     traval_time = routes(extral_inf["出发地"],extral_inf["目的地"])
-
     finall_prompt = get_Final_Prompt(sight,traval_time,question)
-
-    print(finall_prompt)
-
-    answer = get_completion(finall_prompt)
-
-    print()
-
+    # print(finall_prompt)
+    answer = get_Final_Prompt(question)
+    answer_rag = get_completion(finall_prompt)
     print(answer)
+    print('==================================================')
+    print(answer_rag)
 
 
 

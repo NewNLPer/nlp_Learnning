@@ -40,8 +40,8 @@ if __name__ == "__main__":
     uvicorn.run(app, host="192.168.32.23", port=5910)
 
    #  import requests
-   #  url="http://10.1.0.68:1022/chat/"
-   #  query ={"text":"你是谁？"}
+   #  url="http://192.168.32.23:5910/chat/"
+   #  query ={"text":Final_prompt}
    #  response =requests.post(url,json=query)
    #  if response.status_code == 200:
    #     result =response.json()
