@@ -15,8 +15,10 @@ from zhipuai import ZhipuAI
 import warnings
 warnings.filterwarnings("ignore")
 
+import gradio as gr
 
 gaode_api_key = "8d8b55e388a180c9c7913e8f5e8ab10b"
+
 zhipu_api_key = "042436202c1b74e82bda600ffb2d7c5d.SJgSFxMKmg0RgcZc"
 
 class Sort_dic():
@@ -149,13 +151,13 @@ def get_Final_Prompt(sight,traval_time,question):
     """
     return promot.format(question,traval_time,"\n".join(sight))
 
-def main():
+def main(question):
     recall_k = 8
     knowledge_file_path = r"C:\Users\NewNLPer\Desktop\knowledge_seed.json"
     em_model_path = "D:\google下载"
 
     # question = input("question：")
-    question = "我目前在日照市，我想去威海看大海，请帮我规划一个三天的行程。"
+    # question = "我目前在日照市，我想去威海看大海，请帮我规划一个三天的行程。"
 
     prompt = """
     给定一个问题，请帮我对其进行信息抽取，仅需输出抽取后的结果即可.请严格按照给定的格式进行信息抽取，抽取信息后的输出格式为：
@@ -182,18 +184,24 @@ def main():
     traval_time = routes(extral_inf["出发地"],extral_inf["目的地"])
     finall_prompt = get_Final_Prompt(sight,traval_time,question)
     # print(finall_prompt)
-    answer = get_completion(question)
-    time.sleep(10)
+    # answer = get_completion(question)
+    # time.sleep(10)
     answer_rag = get_completion(finall_prompt)
-    print(answer)
-    print('==================================================')
-    print(answer_rag)
-
+    # print(answer)
+    # print('==================================================')
+    # print(answer_rag)
+    return answer_rag
 
 
 
 if __name__ == "__main__":
-    main()
+
+    demo = gr.Interface(fn=main,
+                        inputs="text",
+                        outputs="text",
+                        title="RAG")
+
+    demo.launch(server_name="10.5.181.186", server_port=5911)
 
 """
 我目前在烟台市，我想去日照看海，请帮我规划一个两天的行程。
