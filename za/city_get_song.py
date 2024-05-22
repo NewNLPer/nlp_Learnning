@@ -13,20 +13,20 @@ from tqdm import tqdm
 warnings.filterwarnings("ignore")
 
 # 景点知识库的保存路径
-save_path = r"C:\Users\NewNLPer\Desktop\knowledge_seed.json"
+save_path = r"./knowledge_seed.json"
 
 # 去哪儿官网的地级市景点信息列表
 city_url_list = {
-    "青岛": "https://travel.qunar.com/p-cs299783-qingdao-jingdian-3-1",  # 青岛
-    "济南": "https://travel.qunar.com/p-cs300150-jinan-jingdian-3-1",     # 济南
-    "烟台": "https://travel.qunar.com/p-cs299824-yantai-jingdian-3-1",   # 烟台
-    "泰安": "https://travel.qunar.com/p-cs300151-taian-jingdian-3-1",     # 泰安
-    "威海": "https://travel.qunar.com/p-cs300115-weihai-jingdian-3-1",    # 威海
-    "潍坊": "https://travel.qunar.com/p-cs299800-weifang-jingdian-3-1",   # 潍坊
-    "临沂": "https://travel.qunar.com/p-cs300114-linyi-jingdian-3-1",     # 临沂
-    "枣庄": "https://travel.qunar.com/p-cs300154-zaozhuang-jingdian-3-1", # 枣庄
-    "聊城": "https://travel.qunar.com/p-cs299823-liaocheng-jingdian-3-1", # 聊城
-    "日照": "https://travel.qunar.com/p-cs300153-rizhao-jingdian-3-1"     # 日照
+    "青岛": "https://travel.qunar.com/p-cs299783-qingdao-jingdian-3-1",
+    "济南": "https://travel.qunar.com/p-cs300150-jinan-jingdian-3-1",
+    "烟台": "https://travel.qunar.com/p-cs299824-yantai-jingdian-3-1",
+    "泰安": "https://travel.qunar.com/p-cs300151-taian-jingdian-3-1",
+    "威海": "https://travel.qunar.com/p-cs300115-weihai-jingdian-3-1",
+    "潍坊": "https://travel.qunar.com/p-cs299800-weifang-jingdian-3-1",
+    "临沂": "https://travel.qunar.com/p-cs300114-linyi-jingdian-3-1",
+    "枣庄": "https://travel.qunar.com/p-cs300154-zaozhuang-jingdian-3-1",
+    "聊城": "https://travel.qunar.com/p-cs299823-liaocheng-jingdian-3-1",
+    "日照": "https://travel.qunar.com/p-cs300153-rizhao-jingdian-3-1"
 }
 
 def get_travel_info(text):
@@ -50,7 +50,8 @@ def get_travel_info(text):
         if text[i] == "驴友点评" and not intro:
             start = i + 4
             while start < len(text) and text[start] != "地址:":
-                introduction.append(text[start])
+                if text[start] not in ["展开全部","收起"]:
+                    introduction.append(text[start])
                 start += 1
             area = text[start + 1]
             intro = 1
