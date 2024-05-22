@@ -9,13 +9,14 @@ from text2vec import SentenceModel
 import numpy as np
 from scipy.spatial.distance import cosine
 import requests
+from zhipuai import ZhipuAI
+import warnings
+warnings.filterwarnings("ignore")
+
 
 gaode_api_key = "8d8b55e388a180c9c7913e8f5e8ab10b"
-
+zhipu_api_key = "042436202c1b74e82bda600ffb2d7c5d.SJgSFxMKmg0RgcZc"
 class Sort_dic():
-    """
-    定义一类具有容量要求的排序字典，方便召回最相关的文段
-    """
     def __init__(self,nums):
         self.dic = {}
         self.nums = nums
@@ -103,6 +104,16 @@ class My_langchain():
         return sight
 
 
+def get_completion(s):
+    client = ZhipuAI(api_key=zhipu_api_key)  # 填写您自己的APIKey
+    response = client.chat.completions.create(
+        model="glm-4",  # 填写需要调用的模型名称
+        messages=[
+            {"role": "user", "content": s},
+        ],
+    )
+    return response.choices[0].message.content
+
 def get_lon_lat(i):
     url = 'https://restapi.amap.com/v3/geocode/geo?parameters'
     parameters = {
@@ -122,20 +133,60 @@ def routes(origin,destination):
     response = requests.get('https://restapi.amap.com/v3/direction/driving?parameters',params=parameters)
     text = json.loads(response.text)
     duration = text['route']['paths'][0]['duration']
-    # 换算成小时
-    return str(round(int(duration)/3600,2)) + "h"
+    return "从{}到{}驾车需要{}".format(origin, destination, str(round(int(duration)/3600,2)) + "h")
+
+
+def get_concat_prompt(sight,traval_time,question):
+    promot = """
+    下面是一些景点信息，请根据用户的需求帮其指定一个旅游的行程规划。
+    用户需求：{}
+    路程时间：{}
+    目的地相关景点信息：{}
+    """
+    return promot.format(question,traval_time,"\n".join(sight))
+
+def main():
+    recall_k = 5
+    knowledge_file_path = r"C:\Users\NewNLPer\Desktop\knowledge_seed.json"
+    em_model_path = "D:\google下载"
+
+    question = input("question：")
+
+    prompt = """
+    给定一个问题，请帮我对其进行信息抽取，仅需输出抽取后的结果即可.请严格按照给定的格式进行信息抽取，抽取信息后的输出格式为：
+    {{
+        "出发地": "**/未提及",
+        "目的地": "[**]/[未提及]",
+        "旅游意愿": "**/未提及"
+    }}
+    下面给出一个样例；
+    quesetion = " 我目前在日照市，我想去威海看海，请帮我规划一个三天的行程。"
+    {{
+        "出发地": "日照",
+        "目的地": "威海",
+        "旅游意愿": "看海"
+    }}
+    请根据上述样例，对下面的问题进行信息抽取，仅需输出抽取后的结果即可。
+    new_question = "{}"
+    """
+    prompt = prompt.format(question)
+    extral_inf = json.loads(get_completion(prompt))
+
+    gs = My_langchain(knowledge_file_path,em_model_path)
+
+    sight = gs.get_some_sight(extral_inf["目的地"],extral_inf["旅游意愿"],recall_k)
+    traval_time = routes(extral_inf["出发地"],extral_inf["目的地"])
+
+    finall_prompt = get_concat_prompt(sight,traval_time,question)
+
+    print(finall_prompt)
 
 
 
 
 if __name__ == "__main__":
+    main()
 
-    knowledge_file_path = r"C:\Users\NewNLPer\Desktop\knowledge_seed.json"
-
-    em_model_path = "D:\google下载"
-
-    sf = My_langchain(knowledge_file_path, em_model_path)
-
-    res = sf.get_some_sight("日照","去看海，感受大海的潮来潮去",5)
-
-    print("\n".join(res))
+"""
+我目前在烟台市，我想去泰安旅游，请帮我规划一个三天的行程。
+"""
