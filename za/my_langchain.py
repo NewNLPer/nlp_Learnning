@@ -183,13 +183,7 @@ def main(question):
     sight = gs.get_some_sight(extral_inf["目的地"],extral_inf["旅游意愿"],recall_k)
     traval_time = routes(extral_inf["出发地"],extral_inf["目的地"])
     finall_prompt = get_Final_Prompt(sight,traval_time,question)
-    # print(finall_prompt)
-    # answer = get_completion(question)
-    # time.sleep(10)
     answer_rag = get_completion(finall_prompt)
-    # print(answer)
-    # print('==================================================')
-    # print(answer_rag)
     return answer_rag
 
 
@@ -201,7 +195,7 @@ if __name__ == "__main__":
                         outputs="text",
                         title="RAG")
 
-    demo.launch(server_name="10.5.181.186", server_port=5911)
+    demo.launch(server_name="127.0.0.1", server_port=5910)
 
 """
 我目前在烟台市，我想去日照看海，请帮我规划一个两天的行程。
