@@ -23,7 +23,6 @@ from tqdm import tqdm
 from collections import Counter
 import nltk
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--baichuan_api_keys', type=str,default="",help='get baichuan api-keys')
 parser.add_argument('--knowledge_file_path_list', type=list, default=[], help='add pdf_pdf path to list .')
@@ -32,8 +31,6 @@ parser.add_argument('--fassi_save_path', type=str, default="", help='once save p
 parser.add_argument('--url_setting', type=str, default="127.0.0.1", help='setting url')
 parser.add_argument('--pdf_combine_path', type=str, default="", help='after using will be deleted')
 parser.add_argument('--n_gram', type=int, default=1, help='after using will be deleted')
-
-
 args = parser.parse_args()
 
 import os
@@ -61,7 +58,7 @@ def has_files_in_directory(directory_path):
     return False
 
 
-def recall_score(candidate, reference):
+def acc_rec_score(candidate, reference):
     candidate_tokens = candidate.split()
     reference_tokens = reference.split()
     n = args.n_gram
@@ -117,59 +114,56 @@ llm = BaichuanLLM()
 os.remove(args.pdf_combine_path)
 
 def get_comletion(question):
-    result = "--- 用户所提问题与外部知识库匹配度最高的三个句子如下； ---"
-    result += "\n"
-    result += "========================================================="
+    text1_result = ""
+
     similarDocs = db.similarity_search(question, include_metadata=True, k=3)
 
     for item in similarDocs:
-        result += "\n"
-        result += item.page_content
-        result += "========================================================="
+        text1_result += item.page_content
+        text1_result += "\n"
     retriever = db.as_retriever()
-    qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever)
-    answer = qa.run((question + "," + "请用中文来回答相关问题。"))
-    result += '\n'
-    result += "Final answer combined with baichuan :  "
-    result += '\n'
-    result += answer
-    return result
 
-def colorize_text(text):
-    # 设置不同位置的样式
+    text2_result = ""
+
+    qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever)
+    text3_answer = qa.run((question + "," + "请用中文来回答相关问题。"))
+
+    text4_accuracy,text5_recall = acc_rec_score(text3_answer,text2_result)
+
     colored_text1 = ("<div style='margin-bottom: 20px;'>"
                      "<div style='border: 2px solid black; padding: 10px;'>"
-                     "<div style='font-weight: bold; color:black; margin-bottom: 5px;'>3 Sentences Most Relevant to Question</div>"
+                     "<div style='font-weight: bold; color:black; margin-bottom: 5px;'>Most Relevant to Question</div>"
                      "<div style='color:red; font-family:Times New Roman; font-size:16px;'>{}</div>"
-                     "</div></div>").format(text)
+                     "</div></div>").format(text1_result)
 
     colored_text2 = ("<div style='margin-bottom: 20px;'>"
                      "<div style='border: 2px solid black; padding: 10px;'>"
                      "<div style='font-weight: bold; color:black; margin-bottom: 5px;'>Baichuan Without RAG</div>"
                      "<div style='color:blue; font-family:Helvetica; font-size:16px;'>{}</div>"
-                     "</div></div>").format(text)
+                     "</div></div>").format(text2_result)
 
     colored_text3 = ("<div style='margin-bottom: 20px;'>"
                      "<div style='border: 2px solid black; padding: 10px;'>"
                      "<div style='font-weight: bold; color:black; margin-bottom: 5px;'>Baichuan With RAG</div>"
                      "<div style='color:green; font-family:Courier New; font-size:16px;'>{}</div>"
-                     "</div></div>").format(text)
+                     "</div></div>").format(text3_answer)
 
     colored_text4 = ("<div style='margin-bottom: 20px;'>"
                      "<div style='border: 2px solid black; padding: 10px;'>"
                      "<div style='font-weight: bold; color:black; margin-bottom: 5px;'>Accuracy</div>"
                      "<div style='color:purple; font-family:Courier New; font-size:16px;'>{}</div>"
-                     "</div></div>").format(text)
+                     "</div></div>").format(text4_accuracy)
 
     colored_text5 = ("<div style='margin-bottom: 20px;'>"
                      "<div style='border: 2px solid black; padding: 10px;'>"
                      "<div style='font-weight: bold; color:black; margin-bottom: 5px;'>Recall</div>"
                      "<div style='color:orange; font-family:Courier New; font-size:16px;'>{}</div>"
-                     "</div></div>").format(text)
+                     "</div></div>").format(text5_recall)
 
     # 使用flexbox布局将三个文本在一列中显示
     flex_container_style = "display:flex; flex-direction:column; align-items:flex-start;"
     combined_text = colored_text1 + colored_text2 + colored_text3 + colored_text4 + colored_text5
+
     return "<div style='{}'>{}</div>".format(flex_container_style, combined_text)
 
 
@@ -179,13 +173,13 @@ if __name__ == "__main__":
 
 
     demo = gr.Interface(
-            fn=colorize_text,
+            fn=get_comletion,
             inputs="text",
             outputs="html",
             title="基于Langchain的计算机知识问答系统",
             description="欢迎使用！"
         )
-    demo.launch(server_name = "127.0.0.1",server_port = 5910)
+    demo.launch(server_name = args.url_setting,server_port = 5910)
 
 
 
