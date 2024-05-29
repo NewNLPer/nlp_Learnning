@@ -4,6 +4,8 @@
 @time: 2024/5/28 19:51
 coding with comment！！！
 """
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = "7"
 from langchain.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
@@ -20,6 +22,7 @@ from PyPDF2 import PdfMerger
 from tqdm import tqdm
 from collections import Counter
 from zhipuai import ZhipuAI
+import jieba
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--baichuan_api_keys', type=str,default="",help='get baichuan api-keys')
@@ -32,10 +35,8 @@ parser.add_argument('--n_gram', type=int, default=1, help='after using will be d
 
 args = parser.parse_args()
 
-
-
-import os
 os.environ["BAICHUAN_API_KEY"] = args.baichuan_api_keys
+print(args.knowledge_file_path_list)
 
 def merge_pdfs(pdf_list, output_path):
     merger = PdfMerger()
@@ -60,8 +61,8 @@ def has_files_in_directory(directory_path):
 
 
 def acc_rec_score(candidate, reference):
-    candidate_tokens = candidate.split()
-    reference_tokens = reference.split()
+    candidate_tokens = jieba.lcut(candidate)
+    reference_tokens = jieba.lcut(reference)
     n = args.n_gram
     # 计算N-gram频次
     candidate_ngrams = [tuple(candidate_tokens[i:i+n]) for i in range(len(candidate_tokens)-n+1)]
@@ -87,6 +88,7 @@ if moc:
     db = FAISS.load_local(args.fassi_save_path,
                           embeddings=embeddings,
                           allow_dangerous_deserialization=True)
+
 else:
     print("知识库emb矩阵未存在，需重新生成，请耐心等待 ...")
     merge_pdfs(args.knowledge_file_path_list,args.pdf_combine_path)
@@ -110,10 +112,7 @@ else:
     db = FAISS.load_local(args.fassi_save_path,
                         embeddings=embeddings,
                         allow_dangerous_deserialization=True)
-
-os.remove(args.pdf_combine_path)
-
-
+    print("生成完毕，加载完毕！")
 def get_completion(input):
     client = ZhipuAI(api_key=args.baichuan_api_keys)  # 填写您自己的APIKey
     response = client.chat.completions.create(
@@ -125,8 +124,9 @@ def get_completion(input):
     return response.choices[0].message.content
 
 
-
 def get_comletion(question):
+
+    mark = "=========================================="
 
     text1_result = ""
 
@@ -135,7 +135,7 @@ def get_comletion(question):
     for item in similarDocs:
         text1_result += item.page_content
         text1_result += "\n"
-
+        text1_result += mark
     text2_result = get_completion(question)
 
 
@@ -197,28 +197,3 @@ if __name__ == "__main__":
         )
 
     demo.launch(server_name = args.url_setting,server_port = 5910)
-
-
-    # demo = gr.Interface(fn = get_comletion,
-    #                     inputs = "text",
-    #                     outputs = "text",
-    #                     title="基于Langchain的计算机知识问答系统",
-    #                     description="欢迎使用！"
-    #                     )
-    # demo.launch()
-    # while True:
-    #     question = input()
-    #     similarDocs = db.similarity_search(question, include_metadata = True, k = 3)
-    #     print("--- 用户所提问题与外部知识库匹配度最高的三个句子如下； ---")
-    #     print("=========================================================")
-    #     for item in similarDocs:    #         print(item.page_content)
-    #         print("=========================================================")
-    #     retriever = db.as_retriever()
-    #     qa = RetrievalQA.from_chain_type(llm = llm, chain_type = "stuff", retriever = retriever)
-    #     answer = qa.run((question+","+"请用中文来回答相关问题。"))
-    #     print("BaichuanLLM的回答：" + answer)
-
-
-"""
-如何进行进程调度
-"""
