@@ -100,7 +100,7 @@ else:
     data = loader.load()
     # 初始化加载器
     # # 初始化加载器,文本分片器将该txt文档切分为了每段有128个tokens，片段与片段之间有32个Tokens重叠的文本小片段
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=256, chunk_overlap=64)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=256, chunk_overlap=16)
     # 切割加载的 document
     split_docs = text_splitter.split_documents(data)
     # 考虑embedding
@@ -126,7 +126,7 @@ def get_completion(input):
 
 def get_comletion(question):
 
-    mark = "=========================================="
+    mark = "================================================"
 
     text1_result = ""
 
@@ -136,6 +136,8 @@ def get_comletion(question):
         text1_result += item.page_content
         text1_result += "\n"
         text1_result += mark
+        text1_result += "\n"
+
     text2_result = get_completion(question)
 
 
