@@ -23,7 +23,7 @@ from zhipuai import ZhipuAI
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--baichuan_api_keys', type=str,default="",help='get baichuan api-keys')
-parser.add_argument('--knowledge_file_path_list', type=list, default=[], help='add pdf_pdf path to list .')
+parser.add_argument('--knowledge_file_path_list', nargs="+", default=[], help='add pdf_pdf path to list .')
 parser.add_argument('--em_model_path', type=str, default="", help='form hf download model para')
 parser.add_argument('--fassi_save_path', type=str, default="", help='once save path ,notice need creat a new dic to save')
 parser.add_argument('--url_setting', type=str, default="127.0.0.1", help='setting url')
@@ -31,6 +31,8 @@ parser.add_argument('--pdf_combine_path', type=str, default="", help='after usin
 parser.add_argument('--n_gram', type=int, default=1, help='after using will be deleted')
 
 args = parser.parse_args()
+
+
 
 import os
 os.environ["BAICHUAN_API_KEY"] = args.baichuan_api_keys
@@ -183,18 +185,18 @@ def get_comletion(question):
     return "<div style='{}'>{}</div>".format(flex_container_style, combined_text)
 
 
+
 if __name__ == "__main__":
-    print(args.knowledge_file_path_list)
-    print(type(args.knowledge_file_path_list))
-    exit()
-    # demo = gr.Interface(
-    #         fn=get_comletion,
-    #         inputs="text",
-    #         outputs="html",
-    #         title="基于Langchain的计算机知识问答系统",
-    #         description="欢迎使用！"
-    #     )
-    # demo.launch(server_name = args.url_setting,server_port = 5910)
+
+    demo = gr.Interface(
+            fn=get_comletion,
+            inputs="text",
+            outputs="html",
+            title="基于Langchain的计算机知识问答系统",
+            description="欢迎使用！"
+        )
+
+    demo.launch(server_name = args.url_setting,server_port = 5910)
 
 
     # demo = gr.Interface(fn = get_comletion,
