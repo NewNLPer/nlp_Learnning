@@ -12,16 +12,14 @@ import langchain
 from langchain.cache import InMemoryCache
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 import sentence_transformers
-from langchain.chains import RetrievalQA
 import warnings
 warnings.filterwarnings("ignore")
-from langchain_community.llms import BaichuanLLM
 import gradio as gr
 import argparse
 from PyPDF2 import PdfMerger
 from tqdm import tqdm
 from collections import Counter
-import nltk
+from zhipuai import ZhipuAI
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--baichuan_api_keys', type=str,default="",help='get baichuan api-keys')
@@ -31,6 +29,7 @@ parser.add_argument('--fassi_save_path', type=str, default="", help='once save p
 parser.add_argument('--url_setting', type=str, default="127.0.0.1", help='setting url')
 parser.add_argument('--pdf_combine_path', type=str, default="", help='after using will be deleted')
 parser.add_argument('--n_gram', type=int, default=1, help='after using will be deleted')
+
 args = parser.parse_args()
 
 import os
@@ -110,10 +109,23 @@ else:
                         embeddings=embeddings,
                         allow_dangerous_deserialization=True)
 
-llm = BaichuanLLM()
 os.remove(args.pdf_combine_path)
 
+
+def get_completion(input):
+    client = ZhipuAI(api_key=args.baichuan_api_keys)  # 填写您自己的APIKey
+    response = client.chat.completions.create(
+        model="glm-4",  # 填写需要调用的模型名称
+        messages=[
+            {"role": "user", "content": input},
+        ],
+    )
+    return response.choices[0].message.content
+
+
+
 def get_comletion(question):
+
     text1_result = ""
 
     similarDocs = db.similarity_search(question, include_metadata=True, k=3)
@@ -121,12 +133,16 @@ def get_comletion(question):
     for item in similarDocs:
         text1_result += item.page_content
         text1_result += "\n"
-    retriever = db.as_retriever()
 
-    text2_result = ""
+    text2_result = get_completion(question)
 
-    qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever)
-    text3_answer = qa.run((question + "," + "请用中文来回答相关问题。"))
+
+    prompt = """
+            给定一个问题和一段学习材料，请根据所提供的学习材料来回答这个问题。
+            问题：{}
+            学习材料：{} """.format(question,text1_result)
+
+    text3_answer = get_completion(prompt)
 
     text4_accuracy,text5_recall = acc_rec_score(text3_answer,text2_result)
 
@@ -167,10 +183,7 @@ def get_comletion(question):
     return "<div style='{}'>{}</div>".format(flex_container_style, combined_text)
 
 
-
-
 if __name__ == "__main__":
-
 
     demo = gr.Interface(
             fn=get_comletion,
@@ -180,7 +193,6 @@ if __name__ == "__main__":
             description="欢迎使用！"
         )
     demo.launch(server_name = args.url_setting,server_port = 5910)
-
 
 
     # demo = gr.Interface(fn = get_comletion,
