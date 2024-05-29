@@ -184,15 +184,17 @@ def get_comletion(question):
 
 
 if __name__ == "__main__":
-
-    demo = gr.Interface(
-            fn=get_comletion,
-            inputs="text",
-            outputs="html",
-            title="基于Langchain的计算机知识问答系统",
-            description="欢迎使用！"
-        )
-    demo.launch(server_name = args.url_setting,server_port = 5910)
+    print(args.knowledge_file_path_list)
+    print(type(args.knowledge_file_path_list))
+    exit()
+    # demo = gr.Interface(
+    #         fn=get_comletion,
+    #         inputs="text",
+    #         outputs="html",
+    #         title="基于Langchain的计算机知识问答系统",
+    #         description="欢迎使用！"
+    #     )
+    # demo.launch(server_name = args.url_setting,server_port = 5910)
 
 
     # demo = gr.Interface(fn = get_comletion,
