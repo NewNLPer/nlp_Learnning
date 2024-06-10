@@ -16,6 +16,7 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 
 @app.route('/download', methods=['GET'])
+
 def download_file():
     # 获取客户端的IP地址
     client_ip = request.remote_addr
